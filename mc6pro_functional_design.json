@@ -1,0 +1,643 @@
+{
+  "meta": {
+    "filePurpose": "Functional design spec for a Morningstar MC6 Pro pedalboard controller layout",
+    "device": "Morningstar MC6 Pro",
+    "formatVersion": 1,
+    "createdDate": "2026-03-14",
+    "basedOnFiles": [
+      "Morningstar_MC6PRO_All_Banks_Backup_20260314_094139.json",
+      "MorningstarEngineering_Editor_Profile.json"
+    ],
+    "notes": [
+      "This file is a human-readable design plan, not a direct MC6 Pro import file.",
+      "It is intended to capture desired functionality before converting it into Morningstar Editor presets and MIDI messages.",
+      "The current backup shows active banks named Home, Ableton Guitar, Ableton Looper Voice, and Main Pedals."
+    ]
+  },
+  "designGoals": [
+    "Use the MC6 Pro as the main controller for pedal toggles, looper transport, and bank navigation.",
+    "Keep the home bank simple and performance-safe.",
+    "Use consistent switch behavior across banks wherever possible.",
+    "Reserve room for long press, release, and toggle behaviors once pedal MIDI details are confirmed."
+  ],
+  "mc6proModel": {
+    "switches": 6,
+    "pagesPerBank": 4,
+    "coreActionTypesToDesign": [
+      "press",
+      "release",
+      "long_press",
+      "double_tap",
+      "toggle_on",
+      "toggle_off",
+      "bank_jump",
+      "page_jump"
+    ],
+    "implementationNotes": [
+      "Morningstar presets can send multiple MIDI messages from a single switch action.",
+      "Toggle presets should define both ON and OFF states explicitly.",
+      "Navigation actions should be separated from sound-critical actions where possible."
+    ]
+  },
+  "devices": [
+    {
+      "id": "mc6pro",
+      "role": "master_controller",
+      "midiChannel": null,
+      "ports": {
+        "usb": "TBD",
+        "midiOut": "TBD",
+        "omni": false
+      }
+    },
+    {
+      "id": "ableton_guitar",
+      "role": "software_looper_or_track_control",
+      "midiChannel": 1,
+      "status": "observed_in_backup",
+      "notes": [
+        "Existing backup appears to use channel 1 for the Ableton Guitar looper bank."
+      ]
+    },
+    {
+      "id": "ableton_voice",
+      "role": "software_looper_or_track_control",
+      "midiChannel": 2,
+      "status": "observed_in_backup",
+      "notes": [
+        "Existing backup appears to use channel 2 for the Ableton Looper Voice bank."
+      ]
+    },
+    {
+      "id": "reverb_pedal",
+      "role": "pedal_effect",
+      "midiChannel": null,
+      "status": "needs_user_details",
+      "notes": [
+        "Home/Main Pedals bank references Reverb but the exact MIDI mapping is not yet defined in this spec."
+      ]
+    },
+    {
+      "id": "delay_pedal",
+      "role": "pedal_effect",
+      "midiChannel": null,
+      "status": "needs_user_details"
+    },
+    {
+      "id": "tremolo_pedal",
+      "role": "pedal_effect",
+      "midiChannel": null,
+      "status": "needs_user_details"
+    },
+    {
+      "id": "eq_pedal",
+      "role": "pedal_effect",
+      "midiChannel": null,
+      "status": "needs_user_details"
+    }
+  ],
+  "globalConventions": {
+    "labeling": {
+      "homeBankName": "Home",
+      "emptyPresetLabel": "EMPTY",
+      "toggleOffLabelStyle": "effect name or stop state",
+      "toggleOnLabelStyle": "enabled state or alternate function"
+    },
+    "switchLayout": {
+      "topRow": [
+        "A",
+        "B",
+        "C"
+      ],
+      "bottomRow": [
+        "D",
+        "E",
+        "F"
+      ]
+    },
+    "navigationPolicy": [
+      "Bank 0 should be the performance-safe landing page.",
+      "Top-level home actions should jump into deeper banks instead of packing too much into one page.",
+      "Long-press actions should be used for setup or less-common functions."
+    ]
+  },
+  "banks": [
+    {
+      "bankNumber": 0,
+      "bankName": "Home",
+      "status": "observed_in_backup",
+      "purpose": "Primary navigation and quick-access landing bank",
+      "pages": [
+        {
+          "page": 1,
+          "switches": [
+            {
+              "switch": "A",
+              "presetNumber": 0,
+              "label": "Ableton Looper",
+              "type": "bank_jump",
+              "desiredBehavior": "Jump to the Ableton looper control bank.",
+              "currentObservedBehavior": {
+                "messageTypeCode": 13,
+                "actionCode": 1,
+                "data": [
+                  4,
+                  0,
+                  6
+                ],
+                "inference": "Likely a bank navigation action to bank 4."
+              }
+            },
+            {
+              "switch": "B",
+              "presetNumber": 1,
+              "label": "Main Pedals",
+              "type": "bank_jump",
+              "desiredBehavior": "Jump to the main pedal control bank.",
+              "currentObservedBehavior": {
+                "inference": "Preset name exists in the backup, but the extracted message list appears empty or editor-managed in another structure."
+              }
+            },
+            {
+              "switch": "C",
+              "presetNumber": 2,
+              "label": "EMPTY",
+              "type": "unassigned",
+              "desiredBehavior": "Available for tuner, tap tempo, scene select, or utility function."
+            },
+            {
+              "switch": "D",
+              "presetNumber": 3,
+              "label": "EMPTY",
+              "type": "unassigned",
+              "desiredBehavior": "Available."
+            },
+            {
+              "switch": "E",
+              "presetNumber": 4,
+              "label": "EMPTY",
+              "type": "unassigned",
+              "desiredBehavior": "Available."
+            },
+            {
+              "switch": "F",
+              "presetNumber": 5,
+              "label": "EMPTY",
+              "type": "unassigned",
+              "desiredBehavior": "Available."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "bankNumber": 4,
+      "bankName": "Ableton Guitar",
+      "status": "observed_in_backup",
+      "targetDeviceId": "ableton_guitar",
+      "purpose": "Looper transport and movement for guitar control",
+      "pages": [
+        {
+          "page": 1,
+          "switches": [
+            {
+              "switch": "A",
+              "presetNumber": 0,
+              "label": "Record / Overdub",
+              "type": "momentary_command",
+              "desiredBehavior": "Send record or overdub command to Ableton Guitar looper.",
+              "currentObservedBehavior": {
+                "midiChannel": 1,
+                "messageTypeCode": 2,
+                "actionCode": 1,
+                "data": [
+                  1,
+                  127
+                ]
+              }
+            },
+            {
+              "switch": "B",
+              "presetNumber": 1,
+              "label": "Stop",
+              "type": "momentary_command",
+              "desiredBehavior": "Stop looper playback.",
+              "secondaryActions": [
+                "Possible page or bank navigation on long press"
+              ],
+              "currentObservedBehavior": {
+                "midiChannel": 1,
+                "messages": [
+                  {
+                    "messageTypeCode": 2,
+                    "actionCode": 1,
+                    "data": [
+                      2,
+                      127
+                    ]
+                  },
+                  {
+                    "messageTypeCode": 13,
+                    "actionCode": 3,
+                    "data": [
+                      0,
+                      0,
+                      6
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "switch": "C",
+              "presetNumber": 2,
+              "label": "Undo / Clear",
+              "type": "multi_action",
+              "desiredBehavior": "Short press should undo; long press or alternate action may clear the loop.",
+              "currentObservedBehavior": {
+                "midiChannel": 1,
+                "messages": [
+                  {
+                    "messageTypeCode": 2,
+                    "actionCode": 1,
+                    "data": [
+                      3,
+                      127
+                    ]
+                  },
+                  {
+                    "messageTypeCode": 2,
+                    "actionCode": 1,
+                    "data": [
+                      4,
+                      127
+                    ]
+                  },
+                  {
+                    "messageTypeCode": 2,
+                    "actionCode": 3,
+                    "data": [
+                      3,
+                      127
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "switch": "D",
+              "presetNumber": 3,
+              "label": "Left",
+              "type": "navigation_command",
+              "desiredBehavior": "Move left within the controlled software or UI.",
+              "currentObservedBehavior": {
+                "midiChannel": 1,
+                "messageTypeCode": 35,
+                "actionCode": 1,
+                "data": [
+                  1,
+                  0,
+                  76
+                ]
+              }
+            },
+            {
+              "switch": "E",
+              "presetNumber": 4,
+              "label": "Right",
+              "type": "navigation_command",
+              "desiredBehavior": "Move right within the controlled software or UI.",
+              "currentObservedBehavior": {
+                "midiChannel": 1,
+                "messageTypeCode": 35,
+                "actionCode": 1,
+                "data": [
+                  1,
+                  75
+                ]
+              }
+            },
+            {
+              "switch": "F",
+              "presetNumber": 5,
+              "label": "Stop / Play",
+              "toggleLabel": "Play",
+              "type": "toggle_command",
+              "desiredBehavior": "Toggle between stop and play states for the looper.",
+              "currentObservedBehavior": {
+                "midiChannel": 1,
+                "toggleMessages": {
+                  "offState": {
+                    "messageTypeCode": 2,
+                    "actionCode": 1,
+                    "toggleGroup": 0,
+                    "data": [
+                      5,
+                      127
+                    ]
+                  },
+                  "onState": {
+                    "messageTypeCode": 2,
+                    "actionCode": 1,
+                    "toggleGroup": 1,
+                    "data": [
+                      6,
+                      0
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "bankNumber": 5,
+      "bankName": "Ableton Looper Voice",
+      "status": "observed_in_backup",
+      "targetDeviceId": "ableton_voice",
+      "purpose": "Looper transport and movement for voice control",
+      "pages": [
+        {
+          "page": 1,
+          "switches": [
+            {
+              "switch": "A",
+              "presetNumber": 0,
+              "label": "Record / Overdub",
+              "type": "momentary_command",
+              "desiredBehavior": "Send record or overdub command to Ableton Voice looper.",
+              "currentObservedBehavior": {
+                "midiChannel": 2,
+                "messageTypeCode": 2,
+                "actionCode": 1,
+                "data": [
+                  1,
+                  127
+                ]
+              }
+            },
+            {
+              "switch": "B",
+              "presetNumber": 1,
+              "label": "Stop",
+              "type": "momentary_command",
+              "desiredBehavior": "Stop voice looper playback.",
+              "currentObservedBehavior": {
+                "midiChannel": 2,
+                "messages": [
+                  {
+                    "messageTypeCode": 2,
+                    "actionCode": 1,
+                    "data": [
+                      2,
+                      127
+                    ]
+                  },
+                  {
+                    "messageTypeCode": 13,
+                    "actionCode": 3,
+                    "data": [
+                      0,
+                      0,
+                      6
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "switch": "C",
+              "presetNumber": 2,
+              "label": "Undo / Clear",
+              "type": "multi_action",
+              "desiredBehavior": "Short press should undo; alternate action may clear the loop.",
+              "currentObservedBehavior": {
+                "midiChannel": 2,
+                "messages": [
+                  {
+                    "messageTypeCode": 2,
+                    "actionCode": 1,
+                    "data": [
+                      3,
+                      127
+                    ]
+                  },
+                  {
+                    "messageTypeCode": 2,
+                    "actionCode": 1,
+                    "data": [
+                      4,
+                      127
+                    ]
+                  },
+                  {
+                    "messageTypeCode": 2,
+                    "actionCode": 3,
+                    "data": [
+                      3,
+                      127
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "switch": "D",
+              "presetNumber": 3,
+              "label": "Left",
+              "type": "navigation_command",
+              "desiredBehavior": "Move left within the controlled software or UI.",
+              "currentObservedBehavior": {
+                "midiChannel": 1,
+                "messageTypeCode": 35,
+                "actionCode": 1,
+                "data": [
+                  1,
+                  0,
+                  76
+                ]
+              }
+            },
+            {
+              "switch": "E",
+              "presetNumber": 4,
+              "label": "Right",
+              "type": "navigation_command",
+              "desiredBehavior": "Move right within the controlled software or UI.",
+              "currentObservedBehavior": {
+                "midiChannel": 1,
+                "messageTypeCode": 35,
+                "actionCode": 1,
+                "data": [
+                  1,
+                  75
+                ]
+              }
+            },
+            {
+              "switch": "F",
+              "presetNumber": 5,
+              "label": "Stop / Play",
+              "toggleLabel": "Play",
+              "type": "toggle_command",
+              "desiredBehavior": "Toggle between stop and play states for the voice looper.",
+              "currentObservedBehavior": {
+                "midiChannel": 2,
+                "toggleMessages": {
+                  "offState": {
+                    "messageTypeCode": 2,
+                    "actionCode": 1,
+                    "toggleGroup": 0,
+                    "data": [
+                      5,
+                      127
+                    ]
+                  },
+                  "onState": {
+                    "messageTypeCode": 2,
+                    "actionCode": 1,
+                    "toggleGroup": 1,
+                    "data": [
+                      6,
+                      0
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "bankNumber": 9,
+      "bankName": "Main Pedals",
+      "status": "observed_in_backup",
+      "purpose": "Primary pedal effect control bank",
+      "pages": [
+        {
+          "page": 1,
+          "switches": [
+            {
+              "switch": "A",
+              "presetNumber": 0,
+              "label": "Reverb",
+              "targetDeviceId": "reverb_pedal",
+              "type": "toggle_or_momentary_tbd",
+              "desiredBehavior": "Define whether this should toggle the pedal, toggle a preset, or load a specific sound.",
+              "programmingNeeded": [
+                "pedal model",
+                "midi channel",
+                "message type",
+                "cc or pc number",
+                "off/on values if toggle"
+              ]
+            },
+            {
+              "switch": "B",
+              "presetNumber": 1,
+              "label": "Delay",
+              "targetDeviceId": "delay_pedal",
+              "type": "toggle_or_momentary_tbd",
+              "desiredBehavior": "Define delay behavior and whether hold should expose tap tempo, subdivisions, or trails.",
+              "currentObservedBehavior": {
+                "secondaryMessageDetected": {
+                  "messageTypeCode": 13,
+                  "actionCode": 3,
+                  "data": [
+                    0,
+                    0,
+                    6
+                  ]
+                }
+              },
+              "programmingNeeded": [
+                "pedal model",
+                "midi channel",
+                "message type",
+                "cc or pc number",
+                "tap tempo or alternate function behavior"
+              ]
+            },
+            {
+              "switch": "C",
+              "presetNumber": 2,
+              "label": "Tremolo",
+              "targetDeviceId": "tremolo_pedal",
+              "type": "toggle_or_momentary_tbd",
+              "desiredBehavior": "Define tremolo engage, rate, depth, or preset control."
+            },
+            {
+              "switch": "D",
+              "presetNumber": 3,
+              "label": "EQ",
+              "targetDeviceId": "eq_pedal",
+              "type": "toggle_or_momentary_tbd",
+              "desiredBehavior": "Define EQ engage, preset, or bypass behavior."
+            },
+            {
+              "switch": "E",
+              "presetNumber": 4,
+              "label": "EMPTY",
+              "type": "unassigned",
+              "desiredBehavior": "Available for tuner, mute, boost, scene, or bank navigation."
+            },
+            {
+              "switch": "F",
+              "presetNumber": 5,
+              "label": "EMPTY",
+              "type": "unassigned",
+              "desiredBehavior": "Available."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "questionsToResolve": [
+    "What are the exact pedal brands and models you want the MC6 Pro to control?",
+    "Which pedals are connected by 5-pin MIDI, TRS MIDI, USB MIDI, or via a MIDI box?",
+    "What MIDI channel should each pedal listen on?",
+    "Should each switch act as a toggle, a momentary command, a preset recall, or a multi-action macro?",
+    "Which actions should live on press versus long press versus release?",
+    "Do you want dedicated tap tempo, tuner, mute, bank up/down, and page left/right switches?",
+    "Should the MC6 Pro reflect pedal state with LED colors and toggle names?"
+  ],
+  "nextStepTemplate": {
+    "userCanFillIn": [
+      {
+        "pedal": "Example Pedal Name",
+        "midiChannel": 3,
+        "functionsWanted": [
+          {
+            "switchLabel": "Drive",
+            "bank": "Main Pedals",
+            "switch": "E",
+            "press": {
+              "type": "cc",
+              "number": 20,
+              "value": 127
+            },
+            "toggleOff": {
+              "type": "cc",
+              "number": 20,
+              "value": 0
+            },
+            "longPress": {
+              "type": "pc",
+              "number": 5
+            }
+          }
+        ]
+      }
+    ],
+    "workflow": [
+      "Confirm the pedal inventory and MIDI channels.",
+      "Confirm desired switch behavior for each bank.",
+      "Translate this spec into Morningstar Editor-ready presets.",
+      "Optionally generate or modify the real MC6 Pro backup JSON."
+    ]
+  }
+}
