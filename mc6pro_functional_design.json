@@ -6,12 +6,16 @@
     "createdDate": "2026-03-14",
     "basedOnFiles": [
       "Morningstar_MC6PRO_All_Banks_Backup_20260314_094139.json",
+      "Morningstar_MC6PRO_All_Banks_Backup_20260314_175939.json",
+      "Morningstar_MC6PRO_All_Banks_Backup_20260315_185523.json",
+      "Morningstar_MC6PRO_All_Banks_Backup_20260316_191827.json",
+      "Colors.html",
       "MorningstarEngineering_Editor_Profile.json"
     ],
     "notes": [
       "This file is a human-readable design plan, not a direct MC6 Pro import file.",
       "It is intended to capture desired functionality before converting it into Morningstar Editor presets and MIDI messages.",
-      "The current backup shows active banks named Home, Ableton Guitar, Ableton Looper Voice, and Main Pedals."
+      "The current working backups show active banks including Home, Ableton, Pedals, Reverb, Tremolo, Delay, and Doubler."
     ]
   },
   "designGoals": [
@@ -20,6 +24,16 @@
     "Use consistent switch behavior across banks wherever possible.",
     "Reserve room for long press, release, and toggle behaviors once pedal MIDI details are confirmed."
   ],
+  "alwaysOnList": {
+    "summary": "Track sounds that should normally remain engaged so the controller logic can preserve that expectation.",
+    "entries": [
+      {
+        "device": "Delay",
+        "preset": "Light",
+        "reason": "Current first-pass always-on slapback sound."
+      }
+    ]
+  },
   "mc6proModel": {
     "switches": 6,
     "pagesPerBank": 4,
@@ -65,29 +79,39 @@
       "midiChannel": 2,
       "status": "observed_in_backup",
       "notes": [
-        "Existing backup appears to use channel 2 for the Ableton Looper Voice bank."
+        "Existing backup appears to use channel 2 for the Ableton Looper Voice bank.",
+        "First-pass redesign should reserve channel 1 for Ableton as the preferred software control lane. Whether voice stays on channel 2 or moves to channel 1 can be decided when the Ableton side is revisited."
       ]
     },
     {
       "id": "reverb_pedal",
       "role": "pedal_effect",
-      "midiChannel": null,
-      "status": "needs_user_details",
+      "midiChannel": 6,
+      "status": "planned",
       "notes": [
+        "Logical reverb side of the Strymon Flint.",
+        "Shares the same physical pedal and MIDI channel as the tremolo side.",
         "Home/Main Pedals bank references Reverb but the exact MIDI mapping is not yet defined in this spec."
       ]
     },
     {
       "id": "delay_pedal",
       "role": "pedal_effect",
-      "midiChannel": null,
-      "status": "needs_user_details"
+      "midiChannel": 7,
+      "status": "planned",
+      "notes": [
+        "Planned as the Strymon EC-1."
+      ]
     },
     {
       "id": "tremolo_pedal",
       "role": "pedal_effect",
-      "midiChannel": null,
-      "status": "needs_user_details"
+      "midiChannel": 6,
+      "status": "planned",
+      "notes": [
+        "Logical tremolo side of the Strymon Flint.",
+        "Shares the same physical pedal and MIDI channel as the reverb side."
+      ]
     },
     {
       "id": "eq_pedal",
@@ -96,12 +120,225 @@
       "status": "needs_user_details"
     }
   ],
+  "midiChannelPlan": {
+    "guidingRule": "Reserve MIDI channels 1 through 5 for Ableton and software-facing control, then start hardware pedals at channel 6.",
+    "proposedAssignments": [
+      {
+        "channel": 1,
+        "assignment": "Ableton",
+        "status": "confirmed_by_user"
+      },
+      {
+        "channel": 2,
+        "assignment": "Reserved for future Ableton or software control",
+        "status": "proposed"
+      },
+      {
+        "channel": 3,
+        "assignment": "Reserved for future Ableton or software control",
+        "status": "proposed"
+      },
+      {
+        "channel": 4,
+        "assignment": "Reserved for future Ableton or software control",
+        "status": "proposed"
+      },
+      {
+        "channel": 5,
+        "assignment": "Reserved for future Ableton or software control",
+        "status": "proposed"
+      },
+      {
+        "channel": 6,
+        "assignment": "Strymon Flint",
+        "status": "proposed",
+        "notes": [
+          "Both reverb and tremolo sides live on this one pedal channel."
+        ]
+      },
+      {
+        "channel": 7,
+        "assignment": "Strymon EC-1",
+        "status": "proposed"
+      },
+      {
+        "channel": 8,
+        "assignment": "Strymon Deco",
+        "status": "proposed"
+      },
+      {
+        "channel": 9,
+        "assignment": "Reserved for future expansion",
+        "status": "proposed"
+      }
+    ],
+    "notes": [
+      "Standard MIDI 1.0 provides 16 channels per MIDI port or connection, numbered 1 through 16.",
+      "Audio recording itself does not use MIDI channels, but reserving channels for Ableton or other software targets is a clean routing choice.",
+      "Strymon pedals often default to MIDI channel 1, so each pedal should be reconfigured to match this plan.",
+      "Using one channel per physical pedal keeps MC6 programming easier to reason about and troubleshoot.",
+      "Logical controls for Flint reverb and Flint tremolo should share the same channel because they are two sides of one pedal.",
+      "Based on current official Strymon support documentation, Flint v2, EC-1, and Deco can all be assigned across MIDI channels 1 through 16. Channels 4 through 16 are typically set by putting the pedal in MIDI channel mode and sending a Program Change on the desired channel."
+    ]
+  },
   "globalConventions": {
     "labeling": {
       "homeBankName": "Home",
       "emptyPresetLabel": "EMPTY",
       "toggleOffLabelStyle": "effect name or stop state",
       "toggleOnLabelStyle": "enabled state or alternate function"
+    },
+    "controllerHardware": {
+      "omniports": [
+        {
+          "port": 1,
+          "mode": "MIDI Out - Type A (Standard)",
+          "status": "confirmed_by_diff"
+        },
+        {
+          "port": 2,
+          "mode": "MIDI Out - Type A (Standard)",
+          "status": "confirmed_by_diff"
+        },
+        {
+          "port": 3,
+          "mode": "MIDI Out - Type A (Standard)",
+          "status": "confirmed_by_diff"
+        },
+        {
+          "port": 4,
+          "mode": "Expression",
+          "status": "confirmed_by_diff"
+        }
+      ],
+      "notes": [
+        "The re-exported Morningstar backup after manual editor changes should be treated as the controller-settings baseline.",
+        "In the backup JSON, Omniports 1 through 3 use internal type value 5 and Omniport 4 uses internal type value 1.",
+        "Relay Port A is currently used as the analog tempo output for the Unicorn-style univibe tap input."
+      ]
+    },
+    "universalPageButtons": {
+      "summary": "Every visible page should reserve the third switch for Tap Tempo and the sixth switch for Back/Home.",
+      "purpose": "This avoids getting lost in bank and page navigation and gives the same two escape hatches everywhere in the controller.",
+      "slotRule": {
+        "thirdSwitchOnEveryPage": "Tap Tempo",
+        "sixthSwitchOnEveryPage": "Back on release, Home on long hold"
+      },
+      "pageExamples": [
+        {
+          "page": 1,
+          "letters": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F"
+          ],
+          "homeLetter": "F",
+          "tapTempoLetter": "C"
+        },
+        {
+          "page": 2,
+          "letters": [
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L"
+          ],
+          "homeLetter": "L",
+          "tapTempoLetter": "I"
+        },
+        {
+          "page": 3,
+          "letters": [
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R"
+          ],
+          "homeLetter": "R",
+          "tapTempoLetter": "O"
+        },
+        {
+          "page": 4,
+          "letters": [
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X"
+          ],
+          "homeLetter": "X",
+          "tapTempoLetter": "U"
+        }
+      ],
+      "implementationNotes": [
+        "The top-right switch should go to the parent context page on release and jump to global Home on long hold.",
+        "Tap Tempo should stay on the bottom-right switch of every visible page, which maps to C, I, O, and U in the editor lettering scheme.",
+        "The four remaining positions on each page become the variable slots for pedal or song functions.",
+        "In the generated JSON workflow, the Back/Home buttons should be treated as templated through one shared generator helper rather than edited individually in every bank.",
+        "Tap buttons should use the plain label Tap.",
+        "Back buttons should use the literal label \\- Back.",
+        "The current generated Tap macro should send MC6 MIDI Clock Tap, Relay Port A Sync Clock 8 Taps, and Flint remote tap."
+      ]
+    },
+    "pageColorTiers": {
+      "summary": "Bank background colors should reflect navigation depth so the user can visually tell what level of the controller they are on.",
+      "implementationNotes": [
+        "Use bank color 2 for Home, 49 for Ableton, 8 for Pedals, 127 for Songs, 39 for Reverb, 58 for Tremolo, 61 for Delay, and 4 for Doubler."
+      ],
+      "tiers": [
+        {
+          "tier": "home",
+          "appliesTo": [
+            "Home",
+            "Ableton",
+            "Songs"
+          ]
+        },
+        {
+          "tier": "context_main_pedals",
+          "appliesTo": [
+            "Pedals"
+          ]
+        },
+        {
+          "tier": "detail_pages",
+          "appliesTo": [
+            "Ableton Guitar",
+            "Ableton Voice",
+            "Reverb",
+            "Tremolo",
+            "Delay",
+            "Doubler"
+          ]
+        }
+      ]
+    },
+    "toggleStateBehavior": {
+      "summary": "Scene-style sound buttons should use controller-side toggle state so the active selection can be shown on the MC6 display.",
+      "implementationNotes": [
+        "Use Toggle Reset Groups on the Reverb, Tremolo, and Delay banks so only one sound level stays visually active at a time without letting Tap or Back clear the strip state.",
+        "The current Tremolo bank should use slot A as a Message Scroll preset for Flint tap subdivisions instead of a Light preset.",
+        "That subdivision idea may not be useful with the current controller-side Remote Tap workflow. If a scroll control is needed before moving to MIDI clock, Trem Type is a better immediate candidate.",
+        "Enable remembered preset toggle states in controller settings so the active scene can remain visible when navigating away and back.",
+        "Pos: Both only duplicates the same message in both toggle positions. It does not create a real on/off toggle by itself.",
+        "For true toggle behavior, split the logic between Position 1 and Position 2.",
+        "Position 1 should be the explicit on or selected scene macro.",
+        "Position 2 should explicitly undo, bypass, or reset what Position 1 turned on.",
+        "Use button backgrounds 5, 44, 46, and 3 for Light, Medium, Medium Heavy, and Heavy respectively, with white text.",
+        "Use Tap styling of tan background 34, black text 0, and lime strip 1.",
+        "Use LED color 9 for off state and LED toggle color 1 for on state, based on the manually adjusted Reverb Light sample in the latest backup.",
+        "For the current Strymon setup, Reverb Position 2 should bypass reverb, Tremolo Position 2 should bypass tremolo, and Delay Position 2 should bypass the pedal.",
+        "Do not use bank-level Clear Preset Toggles on these effect banks, because pressing Tap or Back can clear the remembered strip state while the pedal remains on.",
+        "Bank Jump on Long Press executes when the switch is released, so it can feel like Long Press Release in practice."
+      ]
     },
     "switchLayout": {
       "topRow": [
@@ -120,6 +357,1273 @@
       "Top-level home actions should jump into deeper banks instead of packing too much into one page.",
       "Long-press actions should be used for setup or less-common functions."
     ]
+  },
+  "currentPlannedBankOrganization": {
+    "summary": "Current working organization uses a contextual hierarchy: global and contextual home pages in low-numbered banks, deeper pedal pages higher up.",
+    "displayBankMap": [
+      {
+        "displayBank": 1,
+        "internalBank": 0,
+        "name": "Home",
+        "role": "Global home"
+      },
+      {
+        "displayBank": 2,
+        "internalBank": 1,
+        "name": "Ableton",
+        "role": "Contextual home for Ableton"
+      },
+      {
+        "displayBank": 3,
+        "internalBank": 2,
+        "name": "Pedals",
+        "role": "Contextual home for pedals"
+      },
+      {
+        "displayBank": 4,
+        "internalBank": 3,
+        "name": "Songs",
+        "role": "Contextual home for song pages"
+      },
+      {
+        "displayBank": 11,
+        "internalBank": 10,
+        "name": "Ableton Guitar",
+        "role": "Detailed Ableton guitar looper controls"
+      },
+      {
+        "displayBank": 12,
+        "internalBank": 11,
+        "name": "Ableton Voice",
+        "role": "Detailed Ableton voice looper controls"
+      },
+      {
+        "displayBank": 51,
+        "internalBank": 50,
+        "name": "Reverb",
+        "role": "Detailed Flint reverb controls"
+      },
+      {
+        "displayBank": 52,
+        "internalBank": 51,
+        "name": "Tremolo",
+        "role": "Detailed Flint tremolo controls"
+      },
+      {
+        "displayBank": 53,
+        "internalBank": 52,
+        "name": "Delay",
+        "role": "Detailed EC-1 controls"
+      },
+      {
+        "displayBank": 54,
+        "internalBank": 53,
+        "name": "Doubler",
+        "role": "Detailed Deco Doubler controls"
+      }
+    ],
+    "navigationModel": [
+      "Home -> Ableton -> Ableton Guitar or Ableton Voice",
+      "Home -> Pedals -> Reverb or Tremolo or Delay or Doubler",
+      "Home -> Songs"
+    ],
+    "futureReservedSpace": [
+      "Leave room in low banks for additional contextual home pages.",
+      "Leave room in high banks for future pedal pages and reusable macro banks."
+    ]
+  },
+  "strymonFirstPassArchitecture": {
+    "scope": "Current first pass is focused on Strymon pedals, with Flint designed first.",
+    "currentScope": {
+      "summary": "Version 1 should focus on the four core settings per effect family rather than a larger custom preset catalog.",
+      "activeTiers": {
+        "flintReverb": [
+          "Light",
+          "Medium",
+          "Medium Heavy",
+          "Heavy"
+        ],
+        "flintTremolo": [
+          "Div %G",
+          "Light",
+          "Medium",
+          "Heavy"
+        ],
+        "ec1": [
+          "Light",
+          "Medium",
+          "Medium Heavy",
+          "Heavy"
+        ],
+        "decoDoubler": [
+          "Light",
+          "Medium",
+          "Medium Heavy",
+          "Heavy"
+        ]
+      },
+      "futureExpansion": [
+        "Add custom preset slots after the four core settings are stable.",
+        "Use a second page or additional pages for Custom 1 through Custom 4 style presets when needed.",
+        "Keep the first page focused on the four go-to sounds for quick live access."
+      ]
+    },
+    "recommendedArchitecture": [
+      "Use Program Change for whole-pedal Flint scenes such as Home reset, All Defaults, and song shortcuts.",
+      "Use direct MIDI CC macros for live Reverb and Tremolo banks so each side can be controlled independently.",
+      "Avoid double tap behaviors in the first build. Use Press and Long Press only.",
+      "Keep the top-level layout at 6 presets per bank whenever possible."
+    ],
+    "sharedTierVocabulary": {
+      "standardFourLevelPedals": [
+        "Light",
+        "Medium",
+        "Medium Heavy",
+        "Heavy"
+      ],
+      "standardFourLevelAppliesTo": [
+        "Flint Reverb",
+        "Flint Tremolo",
+        "EC-1",
+        "Deco Doubler"
+      ],
+      "notes": [
+        "Use the same level naming wherever possible so song buttons and pedal banks feel consistent.",
+        "The current generated Doubler bank uses the same four-level layout as Delay for speed of live use."
+      ]
+    },
+    "recommendedHomeBehavior": {
+      "summary": "Going Home should recall default scene presets on all Strymon pedals.",
+      "defaultResetConcept": "Each pedal should have a saved default preset that represents the shared baseline sound. For Flint, the recommended baseline is Reverb Medium plus Trem Light."
+    },
+    "flint": {
+      "pedalModel": "Strymon Flint v2",
+      "preferredVoices": {
+        "reverbType": "70s Plate",
+        "reverbTypeCcValue": 2,
+        "tremType": "63 Tube",
+        "tremTypeCcValue": 2
+      },
+      "importantConstraint": "Flint Program Change recalls the current state of the pedal, so a saved Flint preset always represents both reverb and tremolo together.",
+      "midiCcMap": {
+        "tremolo": {
+          "onOff": 10,
+          "type": 11,
+          "intensity": 12,
+          "speed": 13,
+          "tapSubdivision": 14,
+          "boostCut": 15
+        },
+        "reverb": {
+          "onOff": 16,
+          "type": 17,
+          "mix": 18,
+          "color": 19,
+          "decay": 20,
+          "preDelay": 21,
+          "boostCut": 22
+        },
+        "shared": {
+          "effectOrder": 23,
+          "midiClockDivision": 25,
+          "bypassBoth": 33,
+          "midiExpressionEnable": 60,
+          "midiClockEnable": 63,
+          "remoteTap": 93,
+          "expressionPedal": 100
+        }
+      },
+      "wholePedalPresetStrategy": {
+        "useCases": [
+          "Home reset",
+          "All Defaults",
+          "Song shortcuts"
+        ],
+        "recommendedDefaultPreset": {
+          "presetName": "FLT_BASE",
+          "description": "Default Flint scene used when returning Home.",
+          "sound": {
+            "reverb": "70s Plate Medium",
+            "tremolo": "65 Photo Light"
+          },
+          "savedOptions": {
+            "midiClockEnabled": true,
+            "midiClockDivision": "x1/4 unless a song needs another division",
+            "effectOrder": "Reverb > Tremolo",
+            "expressionAssignment": "Choose one default assignment or leave neutral for the first pass"
+          }
+        }
+      },
+      "referenceExports": [
+        {
+          "sourceFile": "1 Preset 1 (1).syx",
+          "observedProduct": "Flint",
+          "presetName": "Preset 1 (1)",
+          "notes": [
+            "This export confirms that a real Flint preset can be inspected from a Strymon sysex export.",
+            "The exported values are useful as a reference, but they are not a direct 1:1 copy of the MIDI CC values sent by the MC6."
+          ],
+          "state": {
+            "midiClock": true,
+            "midiExpression": true,
+            "reverbType": "70s",
+            "tremoloType": "65 photo",
+            "effectOrder": "verb->trem",
+            "tapDivision": "1/4",
+            "clockDivision": "1",
+            "bypassTremolo": true,
+            "bypassReverb": true,
+            "color": 135,
+            "mix": 176,
+            "intensity": 159,
+            "decay": 140,
+            "preDelay": 147,
+            "reverbBoost": 255,
+            "tremBoost": 253,
+            "speed": 686,
+            "expressionAssignment": [
+              {
+                "knob": "Speed",
+                "heel": 0,
+                "toe": 255
+              }
+            ]
+          }
+        }
+      ],
+      "liveControlStrategy": {
+        "summary": "For live pedal banks, each button should send a full side-specific macro so the result is explicit and repeatable.",
+        "reverbBank": {
+          "recommendedLayout": [
+            "Light",
+            "Medium",
+            "Medium Heavy",
+            "Heavy",
+            "Expression",
+            "Back/Home"
+          ],
+          "notes": [
+            "These are recommended starting values and should be tuned by ear once the Flint is connected.",
+            "Every reverb button keeps the reverb voice locked to 70s Plate and leaves tremolo untouched."
+          ],
+          "settings": [
+            {
+              "name": "Light",
+              "intent": "Low-ambience plate that stays out of the way.",
+              "messages": [
+                {
+                  "type": "cc",
+                  "cc": 16,
+                  "value": 127,
+                  "purpose": "Reverb on"
+                },
+                {
+                  "type": "cc",
+                  "cc": 17,
+                  "value": 2,
+                  "purpose": "Select 70s Plate"
+                },
+                {
+                  "type": "cc",
+                  "cc": 18,
+                  "value": 26,
+                  "purpose": "Light mix"
+                },
+                {
+                  "type": "cc",
+                  "cc": 19,
+                  "value": 54,
+                  "purpose": "Slightly dark plate tone"
+                },
+                {
+                  "type": "cc",
+                  "cc": 20,
+                  "value": 40,
+                  "purpose": "Shorter decay"
+                },
+                {
+                  "type": "cc",
+                  "cc": 21,
+                  "value": 10,
+                  "purpose": "Low pre-delay"
+                },
+                {
+                  "type": "cc",
+                  "cc": 22,
+                  "value": 64,
+                  "purpose": "Unity reverb level"
+                }
+              ]
+            },
+            {
+              "name": "Medium",
+              "intent": "Primary always-on reverb level and Home default target.",
+              "messages": [
+                {
+                  "type": "cc",
+                  "cc": 16,
+                  "value": 127,
+                  "purpose": "Reverb on"
+                },
+                {
+                  "type": "cc",
+                  "cc": 17,
+                  "value": 2,
+                  "purpose": "Select 70s Plate"
+                },
+                {
+                  "type": "cc",
+                  "cc": 18,
+                  "value": 38,
+                  "purpose": "Medium mix"
+                },
+                {
+                  "type": "cc",
+                  "cc": 19,
+                  "value": 64,
+                  "purpose": "Balanced plate tone"
+                },
+                {
+                  "type": "cc",
+                  "cc": 20,
+                  "value": 56,
+                  "purpose": "Medium decay"
+                },
+                {
+                  "type": "cc",
+                  "cc": 21,
+                  "value": 14,
+                  "purpose": "Moderate pre-delay"
+                },
+                {
+                  "type": "cc",
+                  "cc": 22,
+                  "value": 64,
+                  "purpose": "Unity reverb level"
+                }
+              ]
+            },
+            {
+              "name": "Medium Heavy",
+              "intent": "Bigger plate without turning into a wash.",
+              "messages": [
+                {
+                  "type": "cc",
+                  "cc": 16,
+                  "value": 127,
+                  "purpose": "Reverb on"
+                },
+                {
+                  "type": "cc",
+                  "cc": 17,
+                  "value": 2,
+                  "purpose": "Select 70s Plate"
+                },
+                {
+                  "type": "cc",
+                  "cc": 18,
+                  "value": 50,
+                  "purpose": "Higher mix"
+                },
+                {
+                  "type": "cc",
+                  "cc": 19,
+                  "value": 70,
+                  "purpose": "Slightly brighter plate tone"
+                },
+                {
+                  "type": "cc",
+                  "cc": 20,
+                  "value": 74,
+                  "purpose": "Longer decay"
+                },
+                {
+                  "type": "cc",
+                  "cc": 21,
+                  "value": 22,
+                  "purpose": "More pre-delay for clarity"
+                },
+                {
+                  "type": "cc",
+                  "cc": 22,
+                  "value": 64,
+                  "purpose": "Unity reverb level"
+                }
+              ]
+            },
+            {
+              "name": "Heavy",
+              "intent": "Large plate texture for featured sections.",
+              "messages": [
+                {
+                  "type": "cc",
+                  "cc": 16,
+                  "value": 127,
+                  "purpose": "Reverb on"
+                },
+                {
+                  "type": "cc",
+                  "cc": 17,
+                  "value": 2,
+                  "purpose": "Select 70s Plate"
+                },
+                {
+                  "type": "cc",
+                  "cc": 18,
+                  "value": 64,
+                  "purpose": "Heavy mix"
+                },
+                {
+                  "type": "cc",
+                  "cc": 19,
+                  "value": 76,
+                  "purpose": "Brighter plate tone"
+                },
+                {
+                  "type": "cc",
+                  "cc": 20,
+                  "value": 94,
+                  "purpose": "Long decay"
+                },
+                {
+                  "type": "cc",
+                  "cc": 21,
+                  "value": 30,
+                  "purpose": "Longer pre-delay"
+                },
+                {
+                  "type": "cc",
+                  "cc": 22,
+                  "value": 64,
+                  "purpose": "Unity reverb level"
+                }
+              ]
+            }
+          ]
+        },
+        "tremoloBank": {
+          "recommendedLayout": [
+            "Light",
+            "Medium",
+            "Medium Heavy",
+            "Heavy",
+            "Expression",
+            "Back/Home"
+          ],
+          "notes": [
+            "These are recommended starting values and should be tuned by ear once the Flint is connected.",
+            "The level macros below intentionally do not change trem speed or clock division.",
+            "Because the MC6 Pro is expected to send MIDI clock, rhythmic division should usually be managed by the default Flint preset or song scenes, not by the Light/Medium/Heavy buttons."
+          ],
+          "settings": [
+            {
+              "name": "Light",
+              "intent": "Always-on photo trem with subtle motion.",
+              "messages": [
+                {
+                  "type": "cc",
+                  "cc": 10,
+                  "value": 127,
+                  "purpose": "Tremolo on"
+                },
+                {
+                  "type": "cc",
+                  "cc": 11,
+                  "value": 3,
+                  "purpose": "Select 65 Photo"
+                },
+                {
+                  "type": "cc",
+                  "cc": 12,
+                  "value": 28,
+                  "purpose": "Low intensity"
+                },
+                {
+                  "type": "cc",
+                  "cc": 15,
+                  "value": 64,
+                  "purpose": "Unity trem level"
+                }
+              ]
+            },
+            {
+              "name": "Medium",
+              "intent": "Noticeable but still general-purpose photo trem.",
+              "messages": [
+                {
+                  "type": "cc",
+                  "cc": 10,
+                  "value": 127,
+                  "purpose": "Tremolo on"
+                },
+                {
+                  "type": "cc",
+                  "cc": 11,
+                  "value": 3,
+                  "purpose": "Select 65 Photo"
+                },
+                {
+                  "type": "cc",
+                  "cc": 12,
+                  "value": 52,
+                  "purpose": "Medium intensity"
+                },
+                {
+                  "type": "cc",
+                  "cc": 15,
+                  "value": 64,
+                  "purpose": "Unity trem level"
+                }
+              ]
+            },
+            {
+              "name": "Medium Heavy",
+              "intent": "Stronger pulse that still keeps the guitar grounded.",
+              "messages": [
+                {
+                  "type": "cc",
+                  "cc": 10,
+                  "value": 127,
+                  "purpose": "Tremolo on"
+                },
+                {
+                  "type": "cc",
+                  "cc": 11,
+                  "value": 3,
+                  "purpose": "Select 65 Photo"
+                },
+                {
+                  "type": "cc",
+                  "cc": 12,
+                  "value": 78,
+                  "purpose": "Higher intensity"
+                },
+                {
+                  "type": "cc",
+                  "cc": 15,
+                  "value": 64,
+                  "purpose": "Unity trem level"
+                }
+              ]
+            },
+            {
+              "name": "Heavy",
+              "intent": "Pronounced photo trem for featured sections.",
+              "messages": [
+                {
+                  "type": "cc",
+                  "cc": 10,
+                  "value": 127,
+                  "purpose": "Tremolo on"
+                },
+                {
+                  "type": "cc",
+                  "cc": 11,
+                  "value": 3,
+                  "purpose": "Select 65 Photo"
+                },
+                {
+                  "type": "cc",
+                  "cc": 12,
+                  "value": 108,
+                  "purpose": "Heavy intensity"
+                },
+                {
+                  "type": "cc",
+                  "cc": 15,
+                  "value": 64,
+                  "purpose": "Unity trem level"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expressionStrategy": {
+        "summary": "The current generated MC6 file uses controller-side expression on Omniport 4, with one bank-specific expression preset per Flint page.",
+        "recommendedApproach": [
+          "Use the Reverb bank expression preset to send Flint CC18 Mix and CC20 Decay together.",
+          "Use the Tremolo bank expression preset to send Flint CC12 Intensity and a small amount of CC15 Boost.",
+          "Keep pedal-side Flint expression assignments as a later option only if a future revision needs deeper internal preset morphing."
+        ],
+        "currentGeneratedAssignments": [
+          "Reverb bank: Mix 30 to 96 plus Decay 52 to 120",
+          "Tremolo bank: Intensity 32 to 127 plus Boost 64 to 78"
+        ]
+      }
+    },
+    "ec1": {
+      "pedalModel": "Strymon EC-1",
+      "recommendedControlModel": "Use saved EC-1 presets via Program Change for most sound selection. Reserve CC messages for tap tempo, expression, utility functions, or rare live tweaks.",
+      "presetNumberingPlan": {
+        "summary": "Reserve EC-1 preset locations 1 through 16 for the main Morningstar workflow.",
+        "activeNow": [
+          {
+            "presetNumber": 1,
+            "role": "Light"
+          },
+          {
+            "presetNumber": 2,
+            "role": "Medium"
+          },
+          {
+            "presetNumber": 3,
+            "role": "Medium Heavy"
+          },
+          {
+            "presetNumber": 4,
+            "role": "Heavy"
+          }
+        ],
+        "reservedForLater": [
+          {
+            "presetNumber": 5,
+            "role": "Future custom preset"
+          },
+          {
+            "presetNumber": 6,
+            "role": "Future custom preset"
+          },
+          {
+            "presetNumber": 7,
+            "role": "Future custom preset"
+          },
+          {
+            "presetNumber": 8,
+            "role": "Future custom preset"
+          },
+          {
+            "presetNumber": 9,
+            "role": "Future custom preset"
+          },
+          {
+            "presetNumber": 10,
+            "role": "Future custom preset"
+          },
+          {
+            "presetNumber": 11,
+            "role": "Future custom preset"
+          },
+          {
+            "presetNumber": 12,
+            "role": "Future custom preset"
+          },
+          {
+            "presetNumber": 13,
+            "role": "Future custom preset"
+          },
+          {
+            "presetNumber": 14,
+            "role": "Future custom preset"
+          },
+          {
+            "presetNumber": 15,
+            "role": "Future custom preset"
+          },
+          {
+            "presetNumber": 16,
+            "role": "Future custom preset"
+          }
+        ],
+        "implementationNotes": [
+          "These are Program Change-driven recalls on the EC-1.",
+          "Avoid Program Change 0 for this lane because EC-1 reserves it for the Favorite setting.",
+          "Avoid Program Change 127 because EC-1 uses it for Manual Mode.",
+          "Some controllers and apps display Program Change numbering starting at 1 instead of 0, so the Morningstar Editor values should always be verified against the actual recalled EC-1 preset."
+        ]
+      },
+      "nixie2Status": {
+        "supported": false,
+        "statusDate": "2026-03-14",
+        "notes": [
+          "Current Strymon Nixie 2 support documentation lists Flint v2 and Deco v2, but does not list EC-1.",
+          "Design the EC-1 library around pedal-stored presets and MIDI recall rather than a Nixie-based editing workflow for now."
+        ]
+      },
+      "wholePedalPresetStrategy": {
+        "useCases": [
+          "Home reset",
+          "Main pedal level selection",
+          "Song shortcuts"
+        ],
+        "recommendedDefaultPreset": {
+          "presetName": "EC1_BASE",
+          "description": "Default EC-1 scene used when returning Home.",
+          "sound": "Medium delay baseline"
+        },
+        "recommendedTierLayout": [
+          "Default",
+          "Light",
+          "Medium",
+          "Medium Heavy",
+          "Heavy"
+        ]
+      },
+      "recommendedCcUtilities": [
+        {
+          "cc": 18,
+          "purpose": "Tap division"
+        },
+        {
+          "cc": 93,
+          "purpose": "Remote tap tempo"
+        },
+        {
+          "cc": 97,
+          "purpose": "Infinite repeats"
+        },
+        {
+          "cc": 100,
+          "purpose": "Expression pedal"
+        },
+        {
+          "cc": 102,
+          "purpose": "Bypass or engage"
+        }
+      ],
+      "notes": [
+        "EC-1 is much simpler than Flint or Deco because it is one effect, so preset recall is usually enough.",
+        "If you keep your main EC-1 sounds in MIDI preset locations 0-127, one Program Change is enough to recall them.",
+        "Delay Light is the current always-on slapback sound and should send CC63 = 0 on Position 1 so MIDI Clock follow is off.",
+        "Delay Light should send CC63 = 127 on Position 2 so clock follow is restored when that toggle is turned off.",
+        "Delay Medium, Delay Medium Heavy, and Delay Heavy should each send CC63 = 127 on Position 1 so choosing another delay sound restores clock follow.",
+        "The current generated Tap buttons should not send direct CC93 tap to the EC-1 anymore.",
+        "Tap should update the MC6 internal MIDI clock and relay sync instead, so Delay Light can stay fixed while the other delay presets continue to follow tempo.",
+        "The current generated Delay bank expression preset on Omniport 4 should send EC-1 CC16 Mix and CC14 Repeats.",
+        "The current generated Delay expression ranges are intended to feel most dramatic on the Heavy delay sound, moving from a strong lead repeat into a wetter and more blooming texture."
+      ]
+    },
+    "deco": {
+      "pedalModel": "Strymon Deco v2",
+      "importantConstraint": "Deco Program Change recalls the current state of the pedal, so a saved Deco preset always represents both the Tape Saturation side and the Doubletracker side together.",
+      "midiCcMap": {
+        "tapeSaturation": {
+          "onOff": 10,
+          "mode": 11,
+          "saturation": 12,
+          "volume": 13,
+          "tone": 14,
+          "lowTrim": 15
+        },
+        "doubletracker": {
+          "onOff": 16,
+          "type": 17,
+          "lagTime": 18,
+          "wobble": 19,
+          "blend": 20,
+          "boostCut": 21,
+          "autoFlangeTime": 22,
+          "wideStereo": 23
+        },
+        "shared": {
+          "bypassBoth": 33,
+          "midiExpressionEnable": 60,
+          "midiClockEnable": 63,
+          "remoteTap": 93,
+          "autoFlange": 97,
+          "expressionPedal": 100
+        }
+      },
+      "wholePedalPresetStrategy": {
+        "useCases": [
+          "Home reset",
+          "All Defaults",
+          "Song shortcuts"
+        ],
+        "recommendedDefaultPreset": {
+          "presetName": "DECO_BASE",
+          "description": "Default Deco scene used when returning Home.",
+          "sound": {
+            "tapeSaturation": "Light",
+            "doubletracker": "Off"
+          },
+          "savedOptions": {
+            "mode": "Classic unless Cassette is intentionally needed",
+            "wideStereo": "Off for mono rigs unless a song needs stereo spread",
+            "expressionAssignment": "Choose one neutral default assignment or leave expression-specific presets for later"
+          }
+        }
+      },
+      "currentGeneratedDoublerBank": {
+        "summary": "The current generated MC6 file treats Doubler like Delay for a fast first pass.",
+        "levels": [
+          "Light -> PC 1",
+          "Medium -> PC 2",
+          "Medium Heavy -> PC 3",
+          "Heavy -> PC 4"
+        ],
+        "behaviorNotes": [
+          "Position 1 recalls the chosen Deco preset, forces the overall Deco path on with CC33 value 127, and then turns the Doubletracker side on with CC16 value 127.",
+          "Position 2 turns the Doubletracker side off with CC16 value 0.",
+          "Long Press sends CC97 = 127 for Auto-Flange.",
+          "Long Press Release sends CC97 = 0 so the flange drops out when the hold ends."
+        ]
+      },
+      "liveControlStrategy": {
+        "summary": "For live pedal banks, each button should send a side-specific Deco macro so Tape Saturation and Doubletracker can be changed independently.",
+        "tapeSaturationBank": {
+          "recommendedLayout": [
+            "Default",
+            "Light",
+            "Medium",
+            "Heavy",
+            "Expression",
+            "Back/Home"
+          ],
+          "notes": [
+            "These are recommended starting values and should be tuned by ear once the pedal is connected.",
+            "Every tape button leaves the Doubletracker side untouched."
+          ],
+          "settings": [
+            {
+              "name": "Default",
+              "intent": "Home baseline for tape color.",
+              "messages": [
+                {
+                  "type": "pc",
+                  "presetName": "DECO_BASE",
+                  "purpose": "Recall full default Deco scene"
+                }
+              ]
+            },
+            {
+              "name": "Light",
+              "intent": "Subtle always-on tape sweetening.",
+              "messages": [
+                {
+                  "type": "cc",
+                  "cc": 10,
+                  "value": 127,
+                  "purpose": "Tape Saturation on"
+                },
+                {
+                  "type": "cc",
+                  "cc": 11,
+                  "value": 1,
+                  "purpose": "Select Classic mode"
+                },
+                {
+                  "type": "cc",
+                  "cc": 12,
+                  "value": 28,
+                  "purpose": "Low saturation"
+                },
+                {
+                  "type": "cc",
+                  "cc": 13,
+                  "value": 64,
+                  "purpose": "Unity volume"
+                },
+                {
+                  "type": "cc",
+                  "cc": 14,
+                  "value": 60,
+                  "purpose": "Balanced tone"
+                }
+              ]
+            },
+            {
+              "name": "Medium",
+              "intent": "More obvious tape richness while staying general-purpose.",
+              "messages": [
+                {
+                  "type": "cc",
+                  "cc": 10,
+                  "value": 127,
+                  "purpose": "Tape Saturation on"
+                },
+                {
+                  "type": "cc",
+                  "cc": 11,
+                  "value": 1,
+                  "purpose": "Select Classic mode"
+                },
+                {
+                  "type": "cc",
+                  "cc": 12,
+                  "value": 48,
+                  "purpose": "Medium saturation"
+                },
+                {
+                  "type": "cc",
+                  "cc": 13,
+                  "value": 66,
+                  "purpose": "Small level lift"
+                },
+                {
+                  "type": "cc",
+                  "cc": 14,
+                  "value": 62,
+                  "purpose": "Slightly warm tone"
+                }
+              ]
+            },
+            {
+              "name": "Heavy",
+              "intent": "Featured tape drive for bigger sections.",
+              "messages": [
+                {
+                  "type": "cc",
+                  "cc": 10,
+                  "value": 127,
+                  "purpose": "Tape Saturation on"
+                },
+                {
+                  "type": "cc",
+                  "cc": 11,
+                  "value": 1,
+                  "purpose": "Select Classic mode"
+                },
+                {
+                  "type": "cc",
+                  "cc": 12,
+                  "value": 76,
+                  "purpose": "High saturation"
+                },
+                {
+                  "type": "cc",
+                  "cc": 13,
+                  "value": 68,
+                  "purpose": "Compensating level lift"
+                },
+                {
+                  "type": "cc",
+                  "cc": 14,
+                  "value": 58,
+                  "purpose": "Slightly darker tone"
+                }
+              ]
+            }
+          ]
+        },
+        "doubletrackerBank": {
+          "recommendedLayout": [
+            "Light",
+            "Medium",
+            "Special",
+            "Flange",
+            "Expression",
+            "Back/Home"
+          ],
+          "notes": [
+            "These are recommended starting values and should be tuned by ear once the pedal is connected.",
+            "Every Doubletracker button leaves the Tape Saturation side untouched.",
+            "The third sound slot is intentionally called Special rather than Heavy so it can represent a featured doubler texture rather than just more of the same.",
+            "The Flange button can be a dedicated CC97 command or can live on long press if you want to keep the top-level layout simpler."
+          ],
+          "settings": [
+            {
+              "name": "Light",
+              "intent": "Subtle widening and thickening.",
+              "messages": [
+                {
+                  "type": "cc",
+                  "cc": 16,
+                  "value": 127,
+                  "purpose": "Doubletracker on"
+                },
+                {
+                  "type": "cc",
+                  "cc": 17,
+                  "value": 1,
+                  "purpose": "Select Sum type"
+                },
+                {
+                  "type": "cc",
+                  "cc": 18,
+                  "value": 24,
+                  "purpose": "Short lag time"
+                },
+                {
+                  "type": "cc",
+                  "cc": 19,
+                  "value": 18,
+                  "purpose": "Low wobble"
+                },
+                {
+                  "type": "cc",
+                  "cc": 20,
+                  "value": 48,
+                  "purpose": "Moderate blend"
+                },
+                {
+                  "type": "cc",
+                  "cc": 21,
+                  "value": 64,
+                  "purpose": "Unity Doubletracker level"
+                }
+              ]
+            },
+            {
+              "name": "Medium",
+              "intent": "Primary solo doubler setting.",
+              "messages": [
+                {
+                  "type": "cc",
+                  "cc": 16,
+                  "value": 127,
+                  "purpose": "Doubletracker on"
+                },
+                {
+                  "type": "cc",
+                  "cc": 17,
+                  "value": 1,
+                  "purpose": "Select Sum type"
+                },
+                {
+                  "type": "cc",
+                  "cc": 18,
+                  "value": 42,
+                  "purpose": "Medium lag time"
+                },
+                {
+                  "type": "cc",
+                  "cc": 19,
+                  "value": 24,
+                  "purpose": "Low-to-medium wobble"
+                },
+                {
+                  "type": "cc",
+                  "cc": 20,
+                  "value": 56,
+                  "purpose": "Stronger blend"
+                },
+                {
+                  "type": "cc",
+                  "cc": 21,
+                  "value": 70,
+                  "purpose": "Small level lift"
+                }
+              ]
+            },
+            {
+              "name": "Special",
+              "intent": "Featured doubler texture such as a bigger widening sound, slap-style repeat, or standout solo treatment.",
+              "messages": [
+                {
+                  "type": "cc",
+                  "cc": 16,
+                  "value": 127,
+                  "purpose": "Doubletracker on"
+                },
+                {
+                  "type": "cc",
+                  "cc": 17,
+                  "value": 1,
+                  "purpose": "Select Sum type"
+                },
+                {
+                  "type": "cc",
+                  "cc": 18,
+                  "value": 60,
+                  "purpose": "Longer lag time"
+                },
+                {
+                  "type": "cc",
+                  "cc": 19,
+                  "value": 34,
+                  "purpose": "More wobble"
+                },
+                {
+                  "type": "cc",
+                  "cc": 20,
+                  "value": 64,
+                  "purpose": "Heavy blend"
+                },
+                {
+                  "type": "cc",
+                  "cc": 21,
+                  "value": 72,
+                  "purpose": "Small level lift"
+                }
+              ]
+            },
+            {
+              "name": "Flange",
+              "intent": "Momentary or special-effect tape flange.",
+              "messages": [
+                {
+                  "type": "cc",
+                  "cc": 97,
+                  "value": 127,
+                  "purpose": "Engage Auto-Flange"
+                }
+              ],
+              "behaviorNotes": [
+                "Best on long press or press-and-hold.",
+                "Release behavior can send CC97 value 0 if a clean exit is needed."
+              ]
+            }
+          ]
+        }
+      },
+      "expressionStrategy": {
+        "summary": "The current generated MC6 file uses controller-side expression on Omniport 4 for the Doubler page.",
+        "recommendedApproach": [
+          "Use the Doubler bank expression preset to send Doubletracker Lag Time, Blend, and Wobble together.",
+          "Keep pedal-side Deco expression assignments as a future option only if a later revision needs more complex morphing."
+        ],
+        "currentGeneratedAssignments": [
+          "Doubler bank: Lag Time 18 to 110 plus Blend 30 to 108 plus Wobble 0 to 72"
+        ]
+      }
+    }
+  },
+  "reusablePresetLibraryArchitecture": {
+    "summary": "Use higher-numbered MC6 banks as reusable action libraries for each Strymon pedal, then trigger those presets from visible banks such as Main Pedals and Songs.",
+    "recommendedStartingBank": 75,
+    "whyThisWorks": [
+      "It centralizes the pedal logic so the same actions can be reused by pedal banks, global utility banks, and song banks.",
+      "It reduces copy-and-paste when a sound definition changes.",
+      "It supports explicit control, which matches the goal of avoiding accidental or conflicting taps."
+    ],
+    "bankLibraryPlan": [
+      {
+        "bankNumber": 74,
+        "bankName": "LIB Global",
+        "purpose": "Reusable global utility commands",
+        "pages": [
+          {
+            "page": 1,
+            "contents": [
+              "Preset 1: Global Home macro",
+              "Preset 2: Global Tap Tempo macro",
+              "Preset 3: All Defaults macro",
+              "Preset 4: Reserved global utility",
+              "Preset 5: Reserved global utility",
+              "Preset 6: Reserved global utility"
+            ]
+          }
+        ],
+        "notes": [
+          "Visible Home buttons on C, I, O, and U should call the Global Home macro.",
+          "Visible Tap Tempo buttons on F, L, R, and X should call the Global Tap Tempo macro."
+        ]
+      },
+      {
+        "bankNumber": 75,
+        "bankName": "LIB Flint",
+        "purpose": "Reusable Flint commands",
+        "pages": [
+          {
+            "page": 1,
+            "contents": [
+              "Preset 1: Flint Default PC scene",
+              "Preset 2: Reverb Light CC macro",
+              "Preset 3: Reverb Medium CC macro",
+              "Preset 4: Reverb Medium Heavy CC macro",
+              "Preset 5: Reverb Heavy CC macro",
+              "Preset 6: Reverb Off or Reverb Expression Selector"
+            ]
+          },
+          {
+            "page": 2,
+            "contents": [
+              "Preset 1: Trem Light CC macro",
+              "Preset 2: Trem Medium CC macro",
+              "Preset 3: Trem Medium Heavy CC macro",
+              "Preset 4: Trem Heavy CC macro",
+              "Preset 5: Trem Off or Trem Expression Selector",
+              "Preset 6: Flint utility preset"
+            ]
+          },
+          {
+            "page": 3,
+            "contents": [
+              "Expression assignment presets for Flint",
+              "Examples: Reverb Mix, Reverb Decay, Reverb Pre-Delay, Trem Intensity, Dual Morph"
+            ]
+          }
+        ]
+      },
+      {
+        "bankNumber": 76,
+        "bankName": "LIB EC-1",
+        "purpose": "Reusable EC-1 commands",
+        "pages": [
+          {
+            "page": 1,
+            "contents": [
+              "Preset 1: EC-1 Light PC 1",
+              "Preset 2: EC-1 Medium PC 2",
+              "Preset 3: EC-1 Medium Heavy PC 3",
+              "Preset 4: EC-1 Heavy PC 4",
+              "Preset 5: EC-1 future custom preset recall",
+              "Preset 6: EC-1 Tap, Infinite, or Expression utility"
+            ]
+          }
+        ]
+      },
+      {
+        "bankNumber": 77,
+        "bankName": "LIB Deco",
+        "purpose": "Reusable Deco commands",
+        "pages": [
+          {
+            "page": 1,
+            "contents": [
+              "Preset 1: Deco Default PC scene",
+              "Preset 2: Tape Light CC macro",
+              "Preset 3: Tape Medium CC macro",
+              "Preset 4: Tape Heavy CC macro",
+              "Preset 5: Tape Expression Selector",
+              "Preset 6: Deco utility preset"
+            ]
+          },
+          {
+            "page": 2,
+            "contents": [
+              "Preset 1: Doubler Light CC macro",
+              "Preset 2: Doubler Medium CC macro",
+              "Preset 3: Doubler Special CC macro",
+              "Preset 4: Flange command",
+              "Preset 5: Doubler Expression Selector",
+              "Preset 6: Deco utility preset"
+            ]
+          }
+        ]
+      }
+    ],
+    "callingModel": {
+      "mainPedalsBank": "Visible control banks can bank-jump into the pedal-specific library banks or call selected library presets directly.",
+      "songBanks": "Song presets can execute multiple library presets in sequence so one song button can build a full cross-pedal scene.",
+      "homeBank": "Home can call the default preset for each pedal library to restore the rig to a known baseline."
+    },
+    "songProgrammingRule": {
+      "summary": "Song presets should be deterministic and explicit.",
+      "recommendedOrder": [
+        "First call any pedal-wide default PC scenes needed to establish a known base state.",
+        "Then call side-specific CC macros that customize only the parts that should change for the song.",
+        "Then send tempo and any global utility commands."
+      ],
+      "importantWarning": "If a song preset does not send a message for a pedal or pedal side, that part will usually remain in its previous state. If a song should guarantee a default sound, it must explicitly call the default for that pedal or side."
+    },
+    "exampleSongArchitecture": {
+      "songName": "Demons",
+      "exampleFlow": [
+        "Call Flint Reverb Medium Heavy CC macro",
+        "Call Flint Trem Medium CC macro",
+        "Call EC-1 preset via Program Change",
+        "Call Deco default preset or Tape Default action to establish the base Deco state",
+        "Call Deco Doubler CC macro for the desired solo or song texture",
+        "Send preset song tempo from MC6"
+      ],
+      "notes": [
+        "If Deco tape saturation should remain at default, the song should still explicitly establish that default rather than relying on whatever happened previously.",
+        "For Flint, the song can either use CC macros for both sides or call one full Flint preset if the exact combined scene is already saved on the pedal."
+      ]
+    },
+    "futureCustomPresetExpansion": {
+      "summary": "After the four core sounds are stable, each pedal bank can add Custom preset slots without changing the overall architecture.",
+      "examples": [
+        "Page 1: Light, Medium, Home, Medium Heavy, Heavy, Tap Tempo",
+        "Page 2: Custom 1, Custom 2, Home, Custom 3, Custom 4, Tap Tempo"
+      ],
+      "notes": [
+        "Flint v2 and Deco v2 custom presets can be auditioned, edited, saved, exported, and organized in Nixie 2.",
+        "EC-1 custom presets should be treated as pedal-stored presets until Strymon adds Nixie 2 support."
+      ]
+    }
   },
   "banks": [
     {
@@ -515,7 +2019,13 @@
       "bankNumber": 9,
       "bankName": "Main Pedals",
       "status": "observed_in_backup",
-      "purpose": "Primary pedal effect control bank",
+      "purpose": "Primary live Strymon navigation bank",
+      "designNotes": [
+        "Reverb and Tremolo are intentionally separate entries even though they both target the Flint on MIDI channel 2.",
+        "This preserves independent live access to each Flint side.",
+        "Because Home and Tap Tempo are global on every page, only four content slots remain per page.",
+        "This makes a two-page Main Pedals bank the cleanest solution."
+      ],
       "pages": [
         {
           "page": 1,
@@ -525,71 +2035,119 @@
               "presetNumber": 0,
               "label": "Reverb",
               "targetDeviceId": "reverb_pedal",
-              "type": "toggle_or_momentary_tbd",
-              "desiredBehavior": "Define whether this should toggle the pedal, toggle a preset, or load a specific sound.",
-              "programmingNeeded": [
-                "pedal model",
-                "midi channel",
-                "message type",
-                "cc or pc number",
-                "off/on values if toggle"
+              "type": "bank_jump",
+              "desiredBehavior": "Jump to the Flint Reverb control bank or page so reverb can be adjusted independently from tremolo.",
+              "implementationNotes": [
+                "This entry targets Flint channel 2 but only calls reverb-side CC macros or reverb expression presets."
               ]
             },
             {
               "switch": "B",
               "presetNumber": 1,
-              "label": "Delay",
-              "targetDeviceId": "delay_pedal",
-              "type": "toggle_or_momentary_tbd",
-              "desiredBehavior": "Define delay behavior and whether hold should expose tap tempo, subdivisions, or trails.",
-              "currentObservedBehavior": {
-                "secondaryMessageDetected": {
-                  "messageTypeCode": 13,
-                  "actionCode": 3,
-                  "data": [
-                    0,
-                    0,
-                    6
-                  ]
-                }
-              },
-              "programmingNeeded": [
-                "pedal model",
-                "midi channel",
-                "message type",
-                "cc or pc number",
-                "tap tempo or alternate function behavior"
+              "label": "Tremolo",
+              "targetDeviceId": "tremolo_pedal",
+              "type": "bank_jump",
+              "desiredBehavior": "Jump to the Flint Tremolo control bank or page so tremolo can be adjusted independently from reverb.",
+              "implementationNotes": [
+                "This entry also targets Flint channel 2 but only calls tremolo-side CC macros or tremolo expression presets."
               ]
             },
             {
               "switch": "C",
               "presetNumber": 2,
-              "label": "Tremolo",
-              "targetDeviceId": "tremolo_pedal",
-              "type": "toggle_or_momentary_tbd",
-              "desiredBehavior": "Define tremolo engage, rate, depth, or preset control."
+              "label": "Home",
+              "type": "global_utility",
+              "desiredBehavior": "Return Home from anywhere and optionally execute the global Home macro.",
+              "implementationNotes": [
+                "This should trigger the reusable Global Home preset from the hidden global library bank."
+              ]
             },
             {
               "switch": "D",
               "presetNumber": 3,
-              "label": "EQ",
-              "targetDeviceId": "eq_pedal",
-              "type": "toggle_or_momentary_tbd",
-              "desiredBehavior": "Define EQ engage, preset, or bypass behavior."
+              "label": "Delay",
+              "targetDeviceId": "delay_pedal",
+              "type": "bank_jump",
+              "desiredBehavior": "Jump to the EC-1 control bank for Light, Medium, Medium Heavy, Heavy, and utility functions.",
+              "implementationNotes": [
+                "EC-1 is expected to rely mostly on Program Change presets."
+              ]
             },
             {
               "switch": "E",
               "presetNumber": 4,
-              "label": "EMPTY",
-              "type": "unassigned",
-              "desiredBehavior": "Available for tuner, mute, boost, scene, or bank navigation."
+              "label": "Doubler",
+              "type": "bank_jump",
+              "desiredBehavior": "Jump to the Deco Doubletracker control bank for Light, Medium, Special, Flange, and expression selection.",
+              "implementationNotes": [
+                "This entry targets the Deco on channel 4 but only uses Doubletracker-side CC macros."
+              ]
             },
             {
               "switch": "F",
               "presetNumber": 5,
-              "label": "EMPTY",
+              "label": "Tap Tempo",
+              "type": "global_utility",
+              "desiredBehavior": "Send global tap tempo from anywhere.",
+              "implementationNotes": [
+                "This should trigger the reusable Global Tap Tempo preset from the hidden global library bank."
+              ]
+            }
+          ]
+        },
+        {
+          "page": 2,
+          "switches": [
+            {
+              "switch": "G",
+              "presetNumber": 6,
+              "label": "Tape",
+              "type": "bank_jump",
+              "desiredBehavior": "Jump to the Deco Tape Saturation control bank for Default, Light, Medium, Heavy, and expression selection.",
+              "implementationNotes": [
+                "This entry targets the Deco on channel 4 but only uses Tape Saturation-side commands."
+              ]
+            },
+            {
+              "switch": "H",
+              "presetNumber": 7,
+              "label": "Songs",
+              "type": "bank_jump",
+              "desiredBehavior": "Jump to the Songs bank or first Songs page."
+            },
+            {
+              "switch": "I",
+              "presetNumber": 8,
+              "label": "Home",
+              "type": "global_utility",
+              "desiredBehavior": "Return Home from anywhere and optionally execute the global Home macro.",
+              "implementationNotes": [
+                "This should trigger the reusable Global Home preset from the hidden global library bank."
+              ]
+            },
+            {
+              "switch": "J",
+              "presetNumber": 9,
+              "label": "All Defaults",
+              "type": "global_utility",
+              "desiredBehavior": "Recall default scenes on all Strymon pedals without leaving the performance flow."
+            },
+            {
+              "switch": "K",
+              "presetNumber": 10,
+              "label": "Reserved",
               "type": "unassigned",
-              "desiredBehavior": "Available."
+              "desiredBehavior": "Available for tuner, mute, expression hub, or future utility."
+            },
+            {
+              "switch": "L",
+              "presetNumber": 11,
+              "label": "Tap Tempo",
+              "type": "global_utility",
+              "desiredBehavior": "Send global tap tempo from anywhere.",
+              "implementationNotes": [
+                "This should trigger the reusable Global Tap Tempo preset from the hidden global library bank."
+              ]
             }
           ]
         }

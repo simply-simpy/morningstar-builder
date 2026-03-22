@@ -1,0 +1,139 @@
+{
+  "meta": {
+    "filePurpose": "Focused Flint CC test macros for MC6 Pro v1 testing",
+    "createdDate": "2026-03-14",
+    "status": "best_guess_for_floor_testing",
+    "notes": [
+      "These values are intended as a practical starting point for testing, not as final tone definitions.",
+      "All messages target the Strymon Flint on MIDI channel 6.",
+      "The selected voices are 70s Plate for reverb and 65 Photo for tremolo.",
+      "These macros are side-specific, so reverb macros should leave tremolo untouched and tremolo macros should leave reverb untouched."
+    ]
+  },
+  "device": {
+    "name": "Strymon Flint v2",
+    "midiChannel": 6,
+    "preferredVoices": {
+      "reverb": "70s Plate",
+      "tremolo": "65 Photo"
+    }
+  },
+  "reference": {
+    "officialCcMap": {
+      "tremoloOnOff": 10,
+      "tremoloType": 11,
+      "tremoloIntensity": 12,
+      "tremoloSpeed": 13,
+      "tapSubdivision": 14,
+      "tremoloBoostCut": 15,
+      "reverbOnOff": 16,
+      "reverbType": 17,
+      "reverbMix": 18,
+      "reverbColor": 19,
+      "reverbDecay": 20,
+      "reverbPreDelay": 21,
+      "reverbBoostCut": 22,
+      "effectOrder": 23,
+      "midiClockDivision": 25,
+      "midiExpressionEnable": 60,
+      "midiClockEnable": 63,
+      "remoteTap": 93,
+      "expressionPedal": 100
+    }
+  },
+  "testMacros": {
+    "reverb": [
+      {
+        "name": "Light",
+        "messages": [
+          { "type": "cc", "channel": 6, "cc": 16, "value": 127, "label": "Reverb On" },
+          { "type": "cc", "channel": 6, "cc": 17, "value": 2, "label": "70s Plate" },
+          { "type": "cc", "channel": 6, "cc": 18, "value": 26, "label": "Mix" },
+          { "type": "cc", "channel": 6, "cc": 19, "value": 54, "label": "Color" },
+          { "type": "cc", "channel": 6, "cc": 20, "value": 40, "label": "Decay" },
+          { "type": "cc", "channel": 6, "cc": 21, "value": 10, "label": "Pre-Delay" },
+          { "type": "cc", "channel": 6, "cc": 22, "value": 64, "label": "Boost/Cut" }
+        ]
+      },
+      {
+        "name": "Medium",
+        "messages": [
+          { "type": "cc", "channel": 6, "cc": 16, "value": 127, "label": "Reverb On" },
+          { "type": "cc", "channel": 6, "cc": 17, "value": 2, "label": "70s Plate" },
+          { "type": "cc", "channel": 6, "cc": 18, "value": 38, "label": "Mix" },
+          { "type": "cc", "channel": 6, "cc": 19, "value": 64, "label": "Color" },
+          { "type": "cc", "channel": 6, "cc": 20, "value": 56, "label": "Decay" },
+          { "type": "cc", "channel": 6, "cc": 21, "value": 14, "label": "Pre-Delay" },
+          { "type": "cc", "channel": 6, "cc": 22, "value": 64, "label": "Boost/Cut" }
+        ]
+      },
+      {
+        "name": "Medium Heavy",
+        "messages": [
+          { "type": "cc", "channel": 6, "cc": 16, "value": 127, "label": "Reverb On" },
+          { "type": "cc", "channel": 6, "cc": 17, "value": 2, "label": "70s Plate" },
+          { "type": "cc", "channel": 6, "cc": 18, "value": 50, "label": "Mix" },
+          { "type": "cc", "channel": 6, "cc": 19, "value": 70, "label": "Color" },
+          { "type": "cc", "channel": 6, "cc": 20, "value": 74, "label": "Decay" },
+          { "type": "cc", "channel": 6, "cc": 21, "value": 22, "label": "Pre-Delay" },
+          { "type": "cc", "channel": 6, "cc": 22, "value": 64, "label": "Boost/Cut" }
+        ]
+      },
+      {
+        "name": "Heavy",
+        "messages": [
+          { "type": "cc", "channel": 6, "cc": 16, "value": 127, "label": "Reverb On" },
+          { "type": "cc", "channel": 6, "cc": 17, "value": 2, "label": "70s Plate" },
+          { "type": "cc", "channel": 6, "cc": 18, "value": 64, "label": "Mix" },
+          { "type": "cc", "channel": 6, "cc": 19, "value": 76, "label": "Color" },
+          { "type": "cc", "channel": 6, "cc": 20, "value": 94, "label": "Decay" },
+          { "type": "cc", "channel": 6, "cc": 21, "value": 30, "label": "Pre-Delay" },
+          { "type": "cc", "channel": 6, "cc": 22, "value": 64, "label": "Boost/Cut" }
+        ]
+      }
+    ],
+    "tremolo": [
+      {
+        "name": "Light",
+        "messages": [
+          { "type": "cc", "channel": 6, "cc": 10, "value": 127, "label": "Tremolo On" },
+          { "type": "cc", "channel": 6, "cc": 11, "value": 3, "label": "65 Photo" },
+          { "type": "cc", "channel": 6, "cc": 12, "value": 28, "label": "Intensity" },
+          { "type": "cc", "channel": 6, "cc": 15, "value": 64, "label": "Boost/Cut" }
+        ]
+      },
+      {
+        "name": "Medium",
+        "messages": [
+          { "type": "cc", "channel": 6, "cc": 10, "value": 127, "label": "Tremolo On" },
+          { "type": "cc", "channel": 6, "cc": 11, "value": 3, "label": "65 Photo" },
+          { "type": "cc", "channel": 6, "cc": 12, "value": 52, "label": "Intensity" },
+          { "type": "cc", "channel": 6, "cc": 15, "value": 64, "label": "Boost/Cut" }
+        ]
+      },
+      {
+        "name": "Medium Heavy",
+        "messages": [
+          { "type": "cc", "channel": 6, "cc": 10, "value": 127, "label": "Tremolo On" },
+          { "type": "cc", "channel": 6, "cc": 11, "value": 3, "label": "65 Photo" },
+          { "type": "cc", "channel": 6, "cc": 12, "value": 78, "label": "Intensity" },
+          { "type": "cc", "channel": 6, "cc": 15, "value": 64, "label": "Boost/Cut" }
+        ]
+      },
+      {
+        "name": "Heavy",
+        "messages": [
+          { "type": "cc", "channel": 6, "cc": 10, "value": 127, "label": "Tremolo On" },
+          { "type": "cc", "channel": 6, "cc": 11, "value": 3, "label": "65 Photo" },
+          { "type": "cc", "channel": 6, "cc": 12, "value": 108, "label": "Intensity" },
+          { "type": "cc", "channel": 6, "cc": 15, "value": 64, "label": "Boost/Cut" }
+        ]
+      }
+    ]
+  },
+  "implementationNotes": [
+    "These tremolo macros intentionally do not send Speed or Tap Subdivision, so they should coexist better with global tap tempo and MIDI clock testing.",
+    "If the reverb or tremolo does not seem to change enough, adjust Mix/Decay for reverb or Intensity for tremolo first.",
+    "If a known baseline is needed before testing, send a Flint preset recall or a Medium macro first."
+  ]
+}
