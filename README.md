@@ -136,6 +136,7 @@ The generated delay buttons now behave as:
 
 - Position 1 = recall the chosen delay preset and explicitly engage the pedal
 - Position 2 = explicitly bypass the pedal
+- `Long hold` on the `Delay` button in `Pedals` now jumps to `Delay Manual`
 
 Additional EC-1 rule:
 
@@ -144,6 +145,56 @@ Additional EC-1 rule:
 - `Delay Medium`, `Delay Med Heavy`, and `Delay Heavy` each send `CC63 = 127` on Position 1 so selecting another delay sound restores clock follow
 - The universal `Tap` buttons no longer send direct `CC93` tap to the EC-1
 - Tap now updates the MC6 internal MIDI clock instead, so clock-following delay presets move with tempo while `Delay Light` can stay fixed as slapback
+
+### Proposed Delay Manual Bank
+
+If you want a dedicated `Delay Manual` bank later, the cleanest version is:
+
+- Page 1:
+- `A = Mix %G` scroll
+- `B = Repeats %G` scroll
+- `C = Tap`
+- `D = Age %G` scroll
+- `E = Mech %G` scroll
+- `F = Back / Home`
+
+- Page 2:
+- `G = RecLvl %G` scroll
+- `H = Preamp %G` scroll
+- `I = Tap`
+- `J = Div %G` scroll
+- `K = Prst %F0` preset scroll
+- `L = Back / Home`
+
+Recommended scroll jobs:
+
+- `Mix` = a short musical range from dry-ish to fairly wet
+- `Repeats` = short range from one slap to more sustaining repeats
+- `Age` = cleaner to darker / older tape
+- `Mechanics` = stable to more warble / machine texture
+- `Rec Level` = `Low`, `Med`, `High`
+- `Preamp` = `Voice A`, `Voice B`, `Boost On`, `Boost Off`
+- `Div` = `1/4`, `dotted 8th`, `1/8`, `triplet`
+- `Prst %F0` = a bounded PC scroll through a curated preset range, ideally `1-16`
+
+Expression note for a future `Delay Manual` bank:
+
+- Because the current MC6 expression setup is bank-wide, one manual page should only have one expression job at a time
+- If you want expression in a manual workflow, the best pattern is separate sub-pages like `Delay Mix`, `Delay Repeats`, `Delay Age`, and `Delay Mechanics`, each with its own expression assignment on Omniport 4
+- For a first pass, `Delay Manual` should probably stay button-and-scroll based, while the normal `Delay` bank keeps expression on `Mix + Repeats`
+
+Important EC-1 constraint:
+
+- `Dry Mode` (`Digital`, `Analog`, `Kill Dry`) and `Spillover` are global EC-1 settings, not normal live MIDI-scrolled parameters
+- They should be treated as pedal setup choices rather than part of the live `Delay Manual` bank
+
+Current generated implementation:
+
+- `Delay Manual` is now its own bank
+- `Delay More` is now a second bank for the discrete options
+- `Long hold` on the `Delay` button from `Pedals` jumps to `Delay Manual`
+- `Long hold` on `Mech %G` inside `Delay Manual` jumps to `Delay More`
+- `Back` from `Delay More` returns to `Delay Manual`
 
 ## Expression
 
@@ -228,11 +279,14 @@ Current contextual bank map in the generated test file:
 - Display `52` = `Tremolo`
 - Display `53` = `Delay`
 - Display `54` = `Doubler`
+- Display `55` = `Delay Manual`
+- Display `56` = `Delay More`
 
 This creates a navigation flow like:
 
 - `Home -> Ableton -> Guitar Looper or Voice Looper`
 - `Home -> Pedals -> Reverb or Tremolo or Delay or Doubler`
+- `Home -> Pedals -> Delay (long hold) -> Delay Manual -> Delay More`
 - `Home -> Songs`
 
 Future hidden or utility banks can still live higher up later if we want reusable macro libraries.

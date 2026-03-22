@@ -420,11 +420,24 @@
         "internalBank": 53,
         "name": "Doubler",
         "role": "Detailed Deco Doubler controls"
+      },
+      {
+        "displayBank": 55,
+        "internalBank": 54,
+        "name": "Delay Manual",
+        "role": "Detailed EC-1 manual editing controls"
+      },
+      {
+        "displayBank": 56,
+        "internalBank": 55,
+        "name": "Delay More",
+        "role": "Additional EC-1 manual editing and preset scroll controls"
       }
     ],
     "navigationModel": [
       "Home -> Ableton -> Ableton Guitar or Ableton Voice",
       "Home -> Pedals -> Reverb or Tremolo or Delay or Doubler",
+      "Home -> Pedals -> Delay long hold -> Delay Manual -> Delay More",
       "Home -> Songs"
     ],
     "futureReservedSpace": [
@@ -1091,7 +1104,64 @@
         "Tap should update the MC6 internal MIDI clock and relay sync instead, so Delay Light can stay fixed while the other delay presets continue to follow tempo.",
         "The current generated Delay bank expression preset on Omniport 4 should send EC-1 CC16 Mix and CC14 Repeats.",
         "The current generated Delay expression ranges are intended to feel most dramatic on the Heavy delay sound, moving from a strong lead repeat into a wetter and more blooming texture."
-      ]
+      ],
+      "proposedDelayManualBank": {
+        "summary": "A future Delay Manual bank can turn the MC6 into a button-and-scroll front panel for the EC-1 while leaving the regular Delay bank optimized for preset recall.",
+        "page1": [
+          "A = Mix scroll",
+          "B = Repeats scroll",
+          "C = Tap",
+          "D = Tape Age scroll",
+          "E = Mechanics scroll",
+          "F = Back/Home"
+        ],
+        "page2": [
+          "G = Rec Level scroll",
+          "H = Preamp scroll",
+          "I = Tap",
+          "J = Tap Division scroll",
+          "K = Preset scroll",
+          "L = Back/Home"
+        ],
+        "recommendedScrollBehaviors": {
+          "mix": "Short musical sweep from dry-ish to fairly wet",
+          "repeats": "Short musical sweep from one slap to more sustaining repeats",
+          "tapeAge": "Cleaner to darker or older tape texture",
+          "mechanics": "Stable to more warble or machine texture",
+          "recLevel": [
+            "Low",
+            "Med",
+            "High"
+          ],
+          "preamp": [
+            "Voice A",
+            "Voice B",
+            "Boost On",
+            "Boost Off"
+          ],
+          "tapDivision": [
+            "Quarter",
+            "Dotted Eighth",
+            "Eighth",
+            "Eighth Triplet"
+          ],
+          "presetScroll": "Bounded PC scroll through a curated preset range, ideally 1 through 16"
+        },
+        "expressionNote": [
+          "Because the current MC6 expression setup is bank-wide, one manual page should only have one expression job at a time.",
+          "If expression is added to a manual workflow later, the clean pattern is separate sub-pages like Delay Mix, Delay Repeats, Delay Age, and Delay Mechanics, each with its own Omniport 4 expression assignment."
+        ],
+        "importantConstraints": [
+          "Dry Mode and Spillover are global EC-1 settings, not normal live MIDI-scrolled parameters.",
+          "The first practical version of Delay Manual should stay mostly button-and-scroll based."
+        ],
+        "implementedNow": [
+          "Long Press on the Delay button in Pedals jumps to Delay Manual.",
+          "Delay Manual currently provides Mix, Repeats, Tape Age, and Mechanics message scroll presets.",
+          "Long Press on Mech in Delay Manual jumps to Delay More.",
+          "Delay More currently provides Rec Level, Preamp voice, Tap Division, and Preset scroll."
+        ]
+      }
     },
     "deco": {
       "pedalModel": "Strymon Deco v2",

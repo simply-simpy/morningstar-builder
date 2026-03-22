@@ -1,7 +1,7 @@
 require "json"
 require "time"
 
-SOURCE_FILE = "Morningstar_MC6PRO_All_Banks_Backup_20260316_191827.json"
+SOURCE_FILE = "Morningstar_MC6PRO_Contextual_V1_Test_20260314.json"
 OUTPUT_FILE = "Morningstar_MC6PRO_Contextual_V1_Test_20260314.json"
 
 HOME_BANK = 0
@@ -14,6 +14,8 @@ FLINT_REVERB_BANK = 50
 FLINT_TREM_BANK = 51
 EC1_BANK = 52
 DECO_DOUBLER_BANK = 53
+DELAY_MANUAL_A_BANK = 54
+DELAY_MANUAL_B_BANK = 55
 
 FLINT_CHANNEL = 6
 EC1_CHANNEL = 7
@@ -34,7 +36,9 @@ PARENT_BANKS = {
   FLINT_REVERB_BANK => MAIN_PEDALS_BANK,
   FLINT_TREM_BANK => MAIN_PEDALS_BANK,
   EC1_BANK => MAIN_PEDALS_BANK,
-  DECO_DOUBLER_BANK => MAIN_PEDALS_BANK
+  DECO_DOUBLER_BANK => MAIN_PEDALS_BANK,
+  DELAY_MANUAL_A_BANK => MAIN_PEDALS_BANK,
+  DELAY_MANUAL_B_BANK => DELAY_MANUAL_A_BANK
 }.freeze
 
 REVERB_MEDIUM = [
@@ -87,6 +91,17 @@ DECO_DOUBLER_LEVELS = {
   "Medium" => 2,
   "Med Heavy" => 3,
   "Heavy" => 4
+}.freeze
+
+DELAY_MANUAL_SCROLLS = {
+  mix: [["Dry", 18], ["Lo", 36], ["Med", 54], ["Hi", 72], ["Wet", 88]],
+  repeats: [["1", 18], ["2", 34], ["3", 52], ["4", 74], ["Long", 104]],
+  tape_age: [["Fresh", 8], ["Warm", 28], ["Worn", 50], ["Old", 74], ["Dust", 100]],
+  mechanics: [["Tight", 6], ["Loose", 20], ["Warp", 40], ["Wow", 64], ["Broken", 96]],
+  rec_level: [["Low", 0], ["Med", 64], ["High", 127]],
+  preamp: [["A", 0], ["B", 127]],
+  tap_division: [["1/4", 127], ["D8", 84], ["1/8", 42], ["Trip", 0]],
+  preset_scroll: (1..16).map { |num| ["P#{num}", num] }
 }.freeze
 
 REVERB_EXPRESSION = [
@@ -455,6 +470,34 @@ def style_scene_toggle!(bank, preset_num, toggle_reset_group:)
   preset["ledToggleColor"] = EFFECT_ON_LED_COLOR
 end
 
+def style_message_scroll_preset!(bank, preset_num, label, background_color:)
+  preset = bank["presetArray"][preset_num]
+  preset["shortName"] = label
+  preset["toMsgScroll"] = true
+  preset["backgroundColor"] = background_color
+  preset["nameColor"] = LEVEL_BUTTON_TEXT_COLOR
+  preset["nameToggleColor"] = LEVEL_BUTTON_TEXT_COLOR
+  preset["ledColor"] = EFFECT_ON_LED_COLOR
+end
+
+def set_cc_scroll_preset!(bank, preset_num, label, channel, cc, steps, background_color:)
+  style_message_scroll_preset!(bank, preset_num, label, background_color: background_color)
+  preset = bank["presetArray"][preset_num]
+  steps.each_with_index do |(step_label, value), message_num|
+    set_cc!(bank, preset_num, message_num, channel, cc, value, action: 2)
+    preset["msgArray"][message_num]["mi"] = step_label
+  end
+end
+
+def set_pc_scroll_preset!(bank, preset_num, label, channel, steps, background_color:)
+  style_message_scroll_preset!(bank, preset_num, label, background_color: background_color)
+  preset = bank["presetArray"][preset_num]
+  steps.each_with_index do |(step_label, value), message_num|
+    set_pc!(bank, preset_num, message_num, channel, value, action: 2)
+    preset["msgArray"][message_num]["mi"] = step_label
+  end
+end
+
 def set_trem_subdivision_scroll_preset!(bank, preset_num)
   preset = bank["presetArray"][preset_num]
   preset["shortName"] = "Div %G"
@@ -561,6 +604,8 @@ reset_bank!(output["data"]["bankArray"][FLINT_REVERB_BANK], FLINT_REVERB_BANK, "
 reset_bank!(output["data"]["bankArray"][FLINT_TREM_BANK], FLINT_TREM_BANK, "Tremolo")
 reset_bank!(output["data"]["bankArray"][EC1_BANK], EC1_BANK, "Delay")
 reset_bank!(output["data"]["bankArray"][DECO_DOUBLER_BANK], DECO_DOUBLER_BANK, "Doubler")
+reset_bank!(output["data"]["bankArray"][DELAY_MANUAL_A_BANK], DELAY_MANUAL_A_BANK, "Delay Manual")
+reset_bank!(output["data"]["bankArray"][DELAY_MANUAL_B_BANK], DELAY_MANUAL_B_BANK, "Delay More")
 reset_bank!(output["data"]["bankArray"][9], 9, "")
 
 set_bank_colors!(output["data"]["bankArray"][HOME_BANK], HOME_BANK_COLOR)
@@ -576,13 +621,15 @@ set_bank_colors!(output["data"]["bankArray"][FLINT_REVERB_BANK], REVERB_BANK_COL
 set_bank_colors!(output["data"]["bankArray"][FLINT_TREM_BANK], TREM_BANK_COLOR, text_color: TREM_BANK_TEXT_COLOR)
 set_bank_colors!(output["data"]["bankArray"][EC1_BANK], DELAY_BANK_COLOR, text_color: DELAY_BANK_TEXT_COLOR)
 set_bank_colors!(output["data"]["bankArray"][DECO_DOUBLER_BANK], DOUBLER_BANK_COLOR, text_color: DOUBLER_BANK_TEXT_COLOR)
+set_bank_colors!(output["data"]["bankArray"][DELAY_MANUAL_A_BANK], DELAY_BANK_COLOR, text_color: DELAY_BANK_TEXT_COLOR)
+set_bank_colors!(output["data"]["bankArray"][DELAY_MANUAL_B_BANK], DELAY_BANK_COLOR, text_color: DELAY_BANK_TEXT_COLOR)
 
-[FLINT_REVERB_BANK, FLINT_TREM_BANK, EC1_BANK, DECO_DOUBLER_BANK].each do |bank_num|
+[FLINT_REVERB_BANK, FLINT_TREM_BANK, EC1_BANK, DECO_DOUBLER_BANK, DELAY_MANUAL_A_BANK, DELAY_MANUAL_B_BANK].each do |bank_num|
   output["data"]["bankArray"][bank_num]["bankClearToggle"] = false
 end
 
 # Universal buttons across all visible banks in this test file.
-[HOME_BANK, ABLETON_HOME_BANK, MAIN_PEDALS_BANK, SONGS_BANK, ABLETON_GUITAR_BANK, ABLETON_VOICE_BANK, FLINT_REVERB_BANK, FLINT_TREM_BANK, EC1_BANK, DECO_DOUBLER_BANK].each do |bank_num|
+[HOME_BANK, ABLETON_HOME_BANK, MAIN_PEDALS_BANK, SONGS_BANK, ABLETON_GUITAR_BANK, ABLETON_VOICE_BANK, FLINT_REVERB_BANK, FLINT_TREM_BANK, EC1_BANK, DECO_DOUBLER_BANK, DELAY_MANUAL_A_BANK, DELAY_MANUAL_B_BANK].each do |bank_num|
   set_universal_back_home_and_tap!(output["data"]["bankArray"][bank_num], PARENT_BANKS.fetch(bank_num))
 end
 
@@ -621,6 +668,7 @@ set_bank_jump!(main_pedals_bank, 1, 0, FLINT_TREM_BANK)
 
 style_nav_button!(main_pedals_bank, 3, "Delay", background_color: MAIN_PEDALS_BUTTON_COLORS.fetch("Delay"), text_color: MAIN_PEDALS_BUTTON_TEXT_COLORS.fetch("Delay"))
 set_bank_jump!(main_pedals_bank, 3, 0, EC1_BANK)
+set_bank_jump!(main_pedals_bank, 3, 1, DELAY_MANUAL_A_BANK, action: 3)
 
 style_nav_button!(main_pedals_bank, 4, "Doubler", background_color: MAIN_PEDALS_BUTTON_COLORS.fetch("Doubler"), text_color: MAIN_PEDALS_BUTTON_TEXT_COLORS.fetch("Doubler"))
 set_bank_jump!(main_pedals_bank, 4, 0, DECO_DOUBLER_BANK)
@@ -691,10 +739,25 @@ doubler_bank = output["data"]["bankArray"][DECO_DOUBLER_BANK]
 end
 configure_expression_preset!(doubler_bank, "Dblr Expr", DOUBLER_EXPRESSION)
 
+# Delay Manual A bank
+delay_manual_a_bank = output["data"]["bankArray"][DELAY_MANUAL_A_BANK]
+set_cc_scroll_preset!(delay_manual_a_bank, 0, "Mix %G", EC1_CHANNEL, 16, DELAY_MANUAL_SCROLLS[:mix], background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Light"))
+set_cc_scroll_preset!(delay_manual_a_bank, 1, "Rpts %G", EC1_CHANNEL, 14, DELAY_MANUAL_SCROLLS[:repeats], background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Medium"))
+set_cc_scroll_preset!(delay_manual_a_bank, 3, "Age %G", EC1_CHANNEL, 13, DELAY_MANUAL_SCROLLS[:tape_age], background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Med Heavy"))
+set_cc_scroll_preset!(delay_manual_a_bank, 4, "Mech %G", EC1_CHANNEL, 15, DELAY_MANUAL_SCROLLS[:mechanics], background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Heavy"))
+set_bank_jump!(delay_manual_a_bank, 4, 5, DELAY_MANUAL_B_BANK, action: 3)
+
+# Delay Manual B bank
+delay_manual_b_bank = output["data"]["bankArray"][DELAY_MANUAL_B_BANK]
+set_cc_scroll_preset!(delay_manual_b_bank, 0, "Lvl %G", EC1_CHANNEL, 11, DELAY_MANUAL_SCROLLS[:rec_level], background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Light"))
+set_cc_scroll_preset!(delay_manual_b_bank, 1, "Pre %G", EC1_CHANNEL, 17, DELAY_MANUAL_SCROLLS[:preamp], background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Medium"))
+set_cc_scroll_preset!(delay_manual_b_bank, 3, "Div %G", EC1_CHANNEL, 18, DELAY_MANUAL_SCROLLS[:tap_division], background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Med Heavy"))
+set_pc_scroll_preset!(delay_manual_b_bank, 4, "Prst %G", EC1_CHANNEL, DELAY_MANUAL_SCROLLS[:preset_scroll], background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Heavy"))
+
 sync_bank_arrangement_names!(output)
 
 output["downloadDate"] = Time.now.utc.iso8601
-output["description"] = "Codex-generated contextual Flint + Delay + Doubler v1 test layout with expression and relay tempo"
+output["description"] = "Codex-generated contextual Flint + Delay + Delay Manual + Doubler v1 test layout with expression and relay tempo"
 output["hash"] = rand(2**31)
 
 File.write(OUTPUT_FILE, JSON.generate(output))
