@@ -168,7 +168,7 @@
       },
       {
         "channel": 9,
-        "assignment": "Reserved for future expansion",
+        "assignment": "Boss RC-500 test / looper",
         "status": "proposed"
       }
     ],
@@ -178,7 +178,9 @@
       "Strymon pedals often default to MIDI channel 1, so each pedal should be reconfigured to match this plan.",
       "Using one channel per physical pedal keeps MC6 programming easier to reason about and troubleshoot.",
       "Logical controls for Flint reverb and Flint tremolo should share the same channel because they are two sides of one pedal.",
-      "Based on current official Strymon support documentation, Flint v2, EC-1, and Deco can all be assigned across MIDI channels 1 through 16. Channels 4 through 16 are typically set by putting the pedal in MIDI channel mode and sending a Program Change on the desired channel."
+      "Based on current official Strymon support documentation, Flint v2, EC-1, and Deco can all be assigned across MIDI channels 1 through 16. Channels 4 through 16 are typically set by putting the pedal in MIDI channel mode and sending a Program Change on the desired channel.",
+      "The current generated MC6 test file uses MIDI channel 9 for RC-500 Program Change and CC test buttons.",
+      "MIDI clock itself is channel-free, so the RC-500 clock test does not depend on channel 9."
     ]
   },
   "globalConventions": {
@@ -356,7 +358,50 @@
       "Bank 0 should be the performance-safe landing page.",
       "Top-level home actions should jump into deeper banks instead of packing too much into one page.",
       "Long-press actions should be used for setup or less-common functions."
-    ]
+    ],
+    "rc500CurrentPlan": {
+      "summary": "The current generated file includes a dedicated RC-500 bank for clock, preset recall, and assign-driven looper control.",
+      "midiChannelForPcAndCc": 9,
+      "notes": [
+        "MIDI clock itself is channel-free, so the clock test does not depend on channel 9.",
+        "The RC-500 bank assumes the looper is configured to receive Program Change and Control Change on MIDI channel 9."
+      ],
+      "requiredRc500Settings": [
+        "Set SYNC CLOCK to MIDI or AUTO so the looper follows MC6 clock.",
+        "Choose a rhythm pattern that behaves as the metronome click.",
+        "Enable the ASSIGN entries below on the RC-500 if the generated Click, Play, Stop, Tempo Up, Tempo Down, and Start buttons should work."
+      ],
+      "suggestedAssignMap": [
+        {
+          "cc": 20,
+          "target": "RHYTHM P/S"
+        },
+        {
+          "cc": 21,
+          "target": "RHYTHM PLAY"
+        },
+        {
+          "cc": 22,
+          "target": "RHYTHM STOP"
+        },
+        {
+          "cc": 23,
+          "target": "TEMPO DOWN"
+        },
+        {
+          "cc": 24,
+          "target": "TEMPO UP"
+        },
+        {
+          "cc": 25,
+          "target": "ALL START"
+        },
+        {
+          "cc": 26,
+          "target": "RHYTHM LEV2"
+        }
+      ]
+    }
   },
   "currentPlannedBankOrganization": {
     "summary": "Current working organization uses a contextual hierarchy: global and contextual home pages in low-numbered banks, deeper pedal pages higher up.",
@@ -432,12 +477,26 @@
         "internalBank": 55,
         "name": "Delay More",
         "role": "Additional EC-1 manual editing and preset scroll controls"
+      },
+      {
+        "displayBank": 57,
+        "internalBank": 56,
+        "name": "Tape",
+        "role": "Detailed Deco Tape Saturation controls"
+      },
+      {
+        "displayBank": 58,
+        "internalBank": 57,
+        "name": "RC500",
+        "role": "Dedicated RC-500 clock and looper control bank"
       }
     ],
     "navigationModel": [
       "Home -> Ableton -> Ableton Guitar or Ableton Voice",
       "Home -> Pedals -> Reverb or Tremolo or Delay or Doubler",
       "Home -> Pedals -> Delay long hold -> Delay Manual -> Delay More",
+      "Home -> Pedals -> Doubler long hold -> Tape",
+      "Home -> RC500",
       "Home -> Songs"
     ],
     "futureReservedSpace": [
@@ -1229,6 +1288,20 @@
           "Long Press Release sends CC97 = 0 so the flange drops out when the hold ends."
         ]
       },
+      "currentGeneratedTapeBank": {
+        "summary": "The current generated MC6 file exposes the Tape side as a dedicated live CC bank.",
+        "levels": [
+          "Light",
+          "Medium",
+          "Heavy"
+        ],
+        "behaviorNotes": [
+          "Access path is currently Pedals -> long hold Doubler.",
+          "Each Tape button forces the overall Deco path on with CC33 value 127 and then turns the Tape side on with CC10 value 127.",
+          "Toggle-off turns only the Tape side off with CC10 value 0.",
+          "Mode scroll currently switches between Classic and Cassette."
+        ]
+      },
       "liveControlStrategy": {
         "summary": "For live pedal banks, each button should send a side-specific Deco macro so Tape Saturation and Doubletracker can be changed independently.",
         "tapeSaturationBank": {
@@ -1528,13 +1601,15 @@
         }
       },
       "expressionStrategy": {
-        "summary": "The current generated MC6 file uses controller-side expression on Omniport 4 for the Doubler page.",
+        "summary": "The current generated MC6 file uses controller-side expression on Omniport 4 for both the Doubler and Tape pages.",
         "recommendedApproach": [
           "Use the Doubler bank expression preset to send Doubletracker Lag Time, Blend, and Wobble together.",
+          "Use the Tape bank expression preset to send Tape Saturation and Tone together.",
           "Keep pedal-side Deco expression assignments as a future option only if a later revision needs more complex morphing."
         ],
         "currentGeneratedAssignments": [
-          "Doubler bank: Lag Time 18 to 110 plus Blend 30 to 108 plus Wobble 0 to 72"
+          "Doubler bank: Lag Time 18 to 110 plus Blend 30 to 108 plus Wobble 0 to 72",
+          "Tape bank: Saturation 20 to 110 plus Tone 80 to 36"
         ]
       }
     }

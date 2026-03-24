@@ -31,7 +31,8 @@ The current agreed MIDI channel plan is:
 - `6` = Flint
 - `7` = EC-1
 - `8` = Deco
-- `9+` = future hardware expansion
+- `9` = RC-500 test channel
+- `10+` = future hardware expansion
 
 Notes:
 
@@ -72,6 +73,7 @@ The generated backup now uses page-level background colors to show context:
 - `Ableton` uses `49` (`darkkhaki`)
 - `Songs` uses `127`
 - `Pedals` uses `8` (`orange`)
+- `RC500` uses `2` (`blue`)
 - `Ableton Guitar` and `Ableton Voice` use `39`
 - `Reverb` uses `39` (`teal`)
 - `Tremolo` uses `58` (`darkred`)
@@ -145,6 +147,47 @@ Additional EC-1 rule:
 - `Delay Medium`, `Delay Med Heavy`, and `Delay Heavy` each send `CC63 = 127` on Position 1 so selecting another delay sound restores clock follow
 - The universal `Tap` buttons no longer send direct `CC93` tap to the EC-1
 - Tap now updates the MC6 internal MIDI clock instead, so clock-following delay presets move with tempo while `Delay Light` can stay fixed as slapback
+
+### RC-500
+
+- `RC500` is now a dedicated looper bank that started as a MIDI wiring test and is now moving toward real live use
+- Access path: `Home -> RC500`
+- The current generated RC500 bank uses display bank `58`
+- `Clock` sends a clean `MIDI Clock Tap` message only, without the extra Flint tap or relay actions from the universal Tap button
+- `Prst %G` is a preset scroll on MIDI channel `9`, using a bounded `1-16` range
+- Page 1 currently uses:
+- `A = Clock`
+- `B = Prst %G`
+- `C = Tap`
+- `D = Click`
+- `E = Play`
+- `F = Back`
+- Page 2 currently uses:
+- `G = Tmp -`
+- `H = Tmp +`
+- `I = Tap`
+- `J = Stop`
+- `K = Start`
+- `L = Back`
+- MIDI clock itself is channel-free, but the RC-500 preset and CC buttons assume the looper is set to receive on channel `9`
+- The normal global `Tap` button still exists on `C` and `I`, so the RC500 bank gives both a clean clock-only test and the usual house tap behavior
+
+Suggested RC-500 ASSIGN map for the current generated bank:
+
+- `CC20` -> `RHYTHM P/S`
+- `CC21` -> `RHYTHM PLAY`
+- `CC22` -> `RHYTHM STOP`
+- `CC23` -> `TEMPO DOWN`
+- `CC24` -> `TEMPO UP`
+- `CC25` -> `ALL START`
+- `CC26` -> `RHYTHM LEV2`
+
+Recommended RC-500 settings for this bank:
+
+- `SYNC CLOCK = MIDI` or `AUTO`
+- choose a `RHYTHM PATTERN` that behaves as your click, such as one of the metronome patterns
+- if you want the click to start from the `Click` button, the RC-500 ASSIGNs above need to be enabled on the looper
+- the RC500 bank expression preset now sends `CC26` on channel `9`, so assigning `CC26 -> RHYTHM LEV2` lets the MC6 expression pedal control click volume
 
 ### Proposed Delay Manual Bank
 
@@ -254,6 +297,16 @@ Start tracking pedals or sounds that should normally stay engaged:
 - `Long hold release` on the same Doubler button sends `CC97 = 0` so the flange drops out when the hold ends
 - The current expression pass also adds `Wobble` to the Doubler bank so the treadle can move from subtle widening toward a more animated and strange double effect
 
+### Deco Tape
+
+- `Tape` is now a dedicated live-control bank
+- Access path: `Pedals -> long hold Doubler`
+- The current generated Tape bank uses side-specific Deco `CC` macros instead of preset recall, so Tape changes can stay independent from Doubler
+- `Light`, `Medium`, and `Heavy` explicitly force the overall Deco path on with `CC33 = 127` and then turn the Tape side on with `CC10 = 127`
+- Toggle-off uses `CC10 = 0`, so it only disables the Tape side
+- `Mode %G` currently scrolls between `Classic` and `Cassette`
+- Tape expression currently uses `Saturation + Tone`
+
 Tremolo division note:
 
 - The current `Div %G` scroll preset changes Flint tap subdivision messages, but that may not produce an obvious change with the current rig because Flint is still using `Remote Tap` rather than following MIDI clock directly
@@ -281,12 +334,16 @@ Current contextual bank map in the generated test file:
 - Display `54` = `Doubler`
 - Display `55` = `Delay Manual`
 - Display `56` = `Delay More`
+- Display `57` = `Tape`
+- Display `58` = `RC500`
 
 This creates a navigation flow like:
 
 - `Home -> Ableton -> Guitar Looper or Voice Looper`
 - `Home -> Pedals -> Reverb or Tremolo or Delay or Doubler`
 - `Home -> Pedals -> Delay (long hold) -> Delay Manual -> Delay More`
+- `Home -> Pedals -> Doubler (long hold) -> Tape`
+- `Home -> RC500`
 - `Home -> Songs`
 
 Future hidden or utility banks can still live higher up later if we want reusable macro libraries.

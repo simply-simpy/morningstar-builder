@@ -16,10 +16,13 @@ EC1_BANK = 52
 DECO_DOUBLER_BANK = 53
 DELAY_MANUAL_A_BANK = 54
 DELAY_MANUAL_B_BANK = 55
+DECO_TAPE_BANK = 56
+RC500_BANK = 57
 
 FLINT_CHANNEL = 6
 EC1_CHANNEL = 7
 DECO_CHANNEL = 8
+RC500_CHANNEL = 9
 ABLETON_GUITAR_CHANNEL = 1
 ABLETON_VOICE_CHANNEL = 2
 
@@ -38,7 +41,9 @@ PARENT_BANKS = {
   EC1_BANK => MAIN_PEDALS_BANK,
   DECO_DOUBLER_BANK => MAIN_PEDALS_BANK,
   DELAY_MANUAL_A_BANK => MAIN_PEDALS_BANK,
-  DELAY_MANUAL_B_BANK => DELAY_MANUAL_A_BANK
+  DELAY_MANUAL_B_BANK => DELAY_MANUAL_A_BANK,
+  DECO_TAPE_BANK => MAIN_PEDALS_BANK,
+  RC500_BANK => HOME_BANK
 }.freeze
 
 REVERB_MEDIUM = [
@@ -93,6 +98,17 @@ DECO_DOUBLER_LEVELS = {
   "Heavy" => 4
 }.freeze
 
+DECO_TAPE_LEVELS = {
+  "Light" => [[10, 127], [11, 0], [12, 28], [13, 64], [14, 72], [15, 64]],
+  "Medium" => [[10, 127], [11, 0], [12, 52], [13, 68], [14, 64], [15, 64]],
+  "Heavy" => [[10, 127], [11, 0], [12, 88], [13, 76], [14, 54], [15, 72]]
+}.freeze
+
+DECO_TAPE_MODE_SCROLL = [
+  ["Clsc", 0],
+  ["Cass", 127]
+].freeze
+
 DELAY_MANUAL_SCROLLS = {
   mix: [["Dry", 18], ["Lo", 36], ["Med", 54], ["Hi", 72], ["Wet", 88]],
   repeats: [["1", 18], ["2", 34], ["3", 52], ["4", 74], ["Long", 104]],
@@ -125,6 +141,15 @@ DOUBLER_EXPRESSION = [
   [DECO_CHANNEL, 19, 0, 72]
 ].freeze
 
+TAPE_EXPRESSION = [
+  [DECO_CHANNEL, 12, 20, 110],
+  [DECO_CHANNEL, 14, 80, 36]
+].freeze
+
+RC500_EXPRESSION = [
+  [RC500_CHANNEL, 26, 0, 127]
+].freeze
+
 OMNIPORT_TYPES = [5, 5, 5, 1].freeze
 POSITION_1 = 0
 POSITION_2 = 1
@@ -140,12 +165,15 @@ REVERB_BANK_COLOR = 39
 TREM_BANK_COLOR = 58
 DELAY_BANK_COLOR = 61
 DOUBLER_BANK_COLOR = 4
+RC500_BANK_COLOR = 2
 REVERB_BANK_TEXT_COLOR = 0
 TREM_BANK_TEXT_COLOR = 127
 DELAY_BANK_TEXT_COLOR = 0
 DOUBLER_BANK_TEXT_COLOR = 0
+RC500_BANK_TEXT_COLOR = 127
 HOME_ABLETON_BUTTON_COLOR = 49
 HOME_PEDALS_BUTTON_COLOR = 8
+HOME_RC500_BUTTON_COLOR = RC500_BANK_COLOR
 LEVEL_BUTTON_BACKGROUNDS = {
   "Light" => 5,
   "Medium" => 44,
@@ -176,10 +204,18 @@ REVERB_TOGGLE_RESET_GROUP = 26
 TREM_TOGGLE_RESET_GROUP = 27
 DELAY_TOGGLE_RESET_GROUP = 28
 DOUBLER_TOGGLE_RESET_GROUP = 29
+TAPE_TOGGLE_RESET_GROUP = 30
 EXPRESSION_PRESET_INDEX = 3
 RELAY_PORT_A = 4
 RELAY_ACTION_NOTHING = 0
 RELAY_ACTION_SYNC_CLOCK_8_TAPS = 6
+RC500_CC_CLICK_TOGGLE = 20
+RC500_CC_RHYTHM_PLAY = 21
+RC500_CC_RHYTHM_STOP = 22
+RC500_CC_TEMPO_DOWN = 23
+RC500_CC_TEMPO_UP = 24
+RC500_CC_ALL_START = 25
+RC500_CC_RHYTHM_LEVEL = 26
 
 def deep_clone(obj)
   JSON.parse(JSON.generate(obj))
@@ -383,6 +419,11 @@ def style_home_preset!(bank, preset_num)
   style_static_preset!(bank, preset_num, "Home", background_color: BACK_BACKGROUND_COLOR, text_color: BACK_TEXT_COLOR)
 end
 
+def style_rc500_test_preset!(bank, preset_num, label, background_color:)
+  style_static_preset!(bank, preset_num, label, background_color: background_color, text_color: LEVEL_BUTTON_TEXT_COLOR)
+  bank["presetArray"][preset_num]["ledColor"] = EFFECT_ON_LED_COLOR
+end
+
 def set_toggle_cc_preset!(bank, preset_num, short_name, toggle_name, channel, cc_off, value_off, cc_on, value_on)
   preset = bank["presetArray"][preset_num]
   preset["shortName"] = short_name
@@ -567,6 +608,21 @@ def set_doubler_scene_preset!(bank, preset_num, label, pc_number)
   set_cc!(bank, preset_num, 5, DECO_CHANNEL, 97, 0, action: 4)
 end
 
+def set_tape_scene_preset!(bank, preset_num, label, messages)
+  set_label!(bank, preset_num, label)
+  style_scene_toggle!(bank, preset_num, toggle_reset_group: TAPE_TOGGLE_RESET_GROUP)
+
+  # Force the overall Deco path and then the Tape side on, regardless of how the
+  # saved preset was stored on the pedal.
+  set_cc!(bank, preset_num, 0, DECO_CHANNEL, 33, 127, position: POSITION_1)
+
+  messages.each_with_index do |(cc, value), message_num|
+    set_cc!(bank, preset_num, message_num + 1, DECO_CHANNEL, cc, value, position: POSITION_1)
+  end
+
+  set_cc!(bank, preset_num, messages.length + 1, DECO_CHANNEL, 10, 0, position: POSITION_2)
+end
+
 def set_universal_back_home_and_tap!(bank, parent_bank)
   TAP_SLOTS.each do |preset_num|
     style_tap_preset!(bank, preset_num)
@@ -606,6 +662,8 @@ reset_bank!(output["data"]["bankArray"][EC1_BANK], EC1_BANK, "Delay")
 reset_bank!(output["data"]["bankArray"][DECO_DOUBLER_BANK], DECO_DOUBLER_BANK, "Doubler")
 reset_bank!(output["data"]["bankArray"][DELAY_MANUAL_A_BANK], DELAY_MANUAL_A_BANK, "Delay Manual")
 reset_bank!(output["data"]["bankArray"][DELAY_MANUAL_B_BANK], DELAY_MANUAL_B_BANK, "Delay More")
+reset_bank!(output["data"]["bankArray"][DECO_TAPE_BANK], DECO_TAPE_BANK, "Tape")
+reset_bank!(output["data"]["bankArray"][RC500_BANK], RC500_BANK, "RC500")
 reset_bank!(output["data"]["bankArray"][9], 9, "")
 
 set_bank_colors!(output["data"]["bankArray"][HOME_BANK], HOME_BANK_COLOR)
@@ -623,13 +681,15 @@ set_bank_colors!(output["data"]["bankArray"][EC1_BANK], DELAY_BANK_COLOR, text_c
 set_bank_colors!(output["data"]["bankArray"][DECO_DOUBLER_BANK], DOUBLER_BANK_COLOR, text_color: DOUBLER_BANK_TEXT_COLOR)
 set_bank_colors!(output["data"]["bankArray"][DELAY_MANUAL_A_BANK], DELAY_BANK_COLOR, text_color: DELAY_BANK_TEXT_COLOR)
 set_bank_colors!(output["data"]["bankArray"][DELAY_MANUAL_B_BANK], DELAY_BANK_COLOR, text_color: DELAY_BANK_TEXT_COLOR)
+set_bank_colors!(output["data"]["bankArray"][DECO_TAPE_BANK], DOUBLER_BANK_COLOR, text_color: DOUBLER_BANK_TEXT_COLOR)
+set_bank_colors!(output["data"]["bankArray"][RC500_BANK], RC500_BANK_COLOR, text_color: RC500_BANK_TEXT_COLOR)
 
-[FLINT_REVERB_BANK, FLINT_TREM_BANK, EC1_BANK, DECO_DOUBLER_BANK, DELAY_MANUAL_A_BANK, DELAY_MANUAL_B_BANK].each do |bank_num|
+[FLINT_REVERB_BANK, FLINT_TREM_BANK, EC1_BANK, DECO_DOUBLER_BANK, DELAY_MANUAL_A_BANK, DELAY_MANUAL_B_BANK, DECO_TAPE_BANK, RC500_BANK].each do |bank_num|
   output["data"]["bankArray"][bank_num]["bankClearToggle"] = false
 end
 
 # Universal buttons across all visible banks in this test file.
-[HOME_BANK, ABLETON_HOME_BANK, MAIN_PEDALS_BANK, SONGS_BANK, ABLETON_GUITAR_BANK, ABLETON_VOICE_BANK, FLINT_REVERB_BANK, FLINT_TREM_BANK, EC1_BANK, DECO_DOUBLER_BANK, DELAY_MANUAL_A_BANK, DELAY_MANUAL_B_BANK].each do |bank_num|
+[HOME_BANK, ABLETON_HOME_BANK, MAIN_PEDALS_BANK, SONGS_BANK, ABLETON_GUITAR_BANK, ABLETON_VOICE_BANK, FLINT_REVERB_BANK, FLINT_TREM_BANK, EC1_BANK, DECO_DOUBLER_BANK, DELAY_MANUAL_A_BANK, DELAY_MANUAL_B_BANK, DECO_TAPE_BANK, RC500_BANK].each do |bank_num|
   set_universal_back_home_and_tap!(output["data"]["bankArray"][bank_num], PARENT_BANKS.fetch(bank_num))
 end
 
@@ -644,8 +704,8 @@ set_bank_jump!(home_bank, 1, 0, MAIN_PEDALS_BANK)
 set_label!(home_bank, 3, "Songs")
 set_bank_jump!(home_bank, 3, 0, SONGS_BANK)
 
-set_label!(home_bank, 4, "Defaults")
-apply_defaults_macro!(home_bank, 4, action: 1, include_home_jump: false)
+style_nav_button!(home_bank, 4, "RC500", background_color: HOME_RC500_BUTTON_COLOR, text_color: 7)
+set_bank_jump!(home_bank, 4, 0, RC500_BANK)
 
 # Ableton context bank
 ableton_home_bank = output["data"]["bankArray"][ABLETON_HOME_BANK]
@@ -672,6 +732,7 @@ set_bank_jump!(main_pedals_bank, 3, 1, DELAY_MANUAL_A_BANK, action: 3)
 
 style_nav_button!(main_pedals_bank, 4, "Doubler", background_color: MAIN_PEDALS_BUTTON_COLORS.fetch("Doubler"), text_color: MAIN_PEDALS_BUTTON_TEXT_COLORS.fetch("Doubler"))
 set_bank_jump!(main_pedals_bank, 4, 0, DECO_DOUBLER_BANK)
+set_bank_jump!(main_pedals_bank, 4, 1, DECO_TAPE_BANK, action: 3)
 
 # Songs context bank
 songs_bank = output["data"]["bankArray"][SONGS_BANK]
@@ -739,6 +800,40 @@ doubler_bank = output["data"]["bankArray"][DECO_DOUBLER_BANK]
 end
 configure_expression_preset!(doubler_bank, "Dblr Expr", DOUBLER_EXPRESSION)
 
+# Tape bank
+tape_bank = output["data"]["bankArray"][DECO_TAPE_BANK]
+[0, 1, 3].zip(DECO_TAPE_LEVELS.to_a).each do |preset_num, (label, messages)|
+  set_tape_scene_preset!(tape_bank, preset_num, label, messages)
+end
+set_cc_scroll_preset!(tape_bank, 4, "Mode %G", DECO_CHANNEL, 11, DECO_TAPE_MODE_SCROLL, background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Heavy"))
+configure_expression_preset!(tape_bank, "Tape Expr", TAPE_EXPRESSION)
+
+# RC-500 test bank
+rc500_bank = output["data"]["bankArray"][RC500_BANK]
+style_rc500_test_preset!(rc500_bank, 0, "Clock", background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Light"))
+set_midi_clock_tap!(rc500_bank, 0, 0, action: 1)
+
+set_pc_scroll_preset!(rc500_bank, 1, "Prst %G", RC500_CHANNEL, DELAY_MANUAL_SCROLLS[:preset_scroll], background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Medium"))
+
+style_rc500_test_preset!(rc500_bank, 3, "Click", background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Med Heavy"))
+set_cc!(rc500_bank, 3, 0, RC500_CHANNEL, RC500_CC_CLICK_TOGGLE, 127, action: 1)
+
+style_rc500_test_preset!(rc500_bank, 4, "Play", background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Heavy"))
+set_cc!(rc500_bank, 4, 0, RC500_CHANNEL, RC500_CC_RHYTHM_PLAY, 127, action: 1)
+
+style_rc500_test_preset!(rc500_bank, 6, "Tmp -", background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Light"))
+set_cc!(rc500_bank, 6, 0, RC500_CHANNEL, RC500_CC_TEMPO_DOWN, 127, action: 1)
+
+style_rc500_test_preset!(rc500_bank, 7, "Tmp +", background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Medium"))
+set_cc!(rc500_bank, 7, 0, RC500_CHANNEL, RC500_CC_TEMPO_UP, 127, action: 1)
+
+style_rc500_test_preset!(rc500_bank, 9, "Stop", background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Med Heavy"))
+set_cc!(rc500_bank, 9, 0, RC500_CHANNEL, RC500_CC_RHYTHM_STOP, 127, action: 1)
+
+style_rc500_test_preset!(rc500_bank, 10, "Start", background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Heavy"))
+set_cc!(rc500_bank, 10, 0, RC500_CHANNEL, RC500_CC_ALL_START, 127, action: 1)
+configure_expression_preset!(rc500_bank, "RC500 Expr", RC500_EXPRESSION)
+
 # Delay Manual A bank
 delay_manual_a_bank = output["data"]["bankArray"][DELAY_MANUAL_A_BANK]
 set_cc_scroll_preset!(delay_manual_a_bank, 0, "Mix %G", EC1_CHANNEL, 16, DELAY_MANUAL_SCROLLS[:mix], background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Light"))
@@ -757,7 +852,7 @@ set_pc_scroll_preset!(delay_manual_b_bank, 4, "Prst %G", EC1_CHANNEL, DELAY_MANU
 sync_bank_arrangement_names!(output)
 
 output["downloadDate"] = Time.now.utc.iso8601
-output["description"] = "Codex-generated contextual Flint + Delay + Delay Manual + Doubler v1 test layout with expression and relay tempo"
+output["description"] = "Codex-generated contextual Flint + Delay + Delay Manual + Deco Tape + Doubler + RC500 layout with expression and relay tempo"
 output["hash"] = rand(2**31)
 
 File.write(OUTPUT_FILE, JSON.generate(output))
