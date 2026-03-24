@@ -31,7 +31,7 @@ The current agreed MIDI channel plan is:
 - `6` = Flint
 - `7` = EC-1
 - `8` = Deco
-- `9` = RC-500 test channel
+- `9` = RC-500 looper channel
 - `10+` = future hardware expansion
 
 Notes:
@@ -153,41 +153,37 @@ Additional EC-1 rule:
 - `RC500` is now a dedicated looper bank that started as a MIDI wiring test and is now moving toward real live use
 - Access path: `Home -> RC500`
 - The current generated RC500 bank uses display bank `58`
-- `Clock` sends a clean `MIDI Clock Tap` message only, without the extra Flint tap or relay actions from the universal Tap button
-- `Prst %G` is a preset scroll on MIDI channel `9`, using a bounded `1-16` range
 - Page 1 currently uses:
-- `A = Clock`
-- `B = Prst %G`
+- `A = Tmp -`
+- `B = Tmp +`
 - `C = Tap`
-- `D = Click`
-- `E = Play`
+- `D = Arm`
+- `E = Start`
 - `F = Back`
-- Page 2 currently uses:
-- `G = Tmp -`
-- `H = Tmp +`
-- `I = Tap`
-- `J = Stop`
-- `K = Start`
-- `L = Back`
 - MIDI clock itself is channel-free, but the RC-500 preset and CC buttons assume the looper is set to receive on channel `9`
-- The normal global `Tap` button still exists on `C` and `I`, so the RC500 bank gives both a clean clock-only test and the usual house tap behavior
+- `Tmp -` and `Tmp +` are momentary tempo nudges:
+- short press changes by `1 BPM`
+- long press sends five repeats for a `5 BPM` jump
+- `Tap` is the same global tap macro used elsewhere on the controller
+- `Arm` is a true toggle: Position 1 arms rhythm, Position 2 unarms it
+- `Start` is a separate transport toggle: Position 1 starts transport, Position 2 stops it
+- The RC500 bank expression preset sends `CC26` on channel `9` for click volume control
 
 Suggested RC-500 ASSIGN map for the current generated bank:
 
-- `CC20` -> `RHYTHM P/S`
-- `CC21` -> `RHYTHM PLAY`
-- `CC22` -> `RHYTHM STOP`
+- `CC20` -> `RHYTHM PLAY`
+- `CC21` -> `RHYTHM STOP`
+- `CC22` -> transport `START/STOP` style target
 - `CC23` -> `TEMPO DOWN`
 - `CC24` -> `TEMPO UP`
-- `CC25` -> `ALL START`
 - `CC26` -> `RHYTHM LEV2`
 
 Recommended RC-500 settings for this bank:
 
 - `SYNC CLOCK = MIDI` or `AUTO`
 - choose a `RHYTHM PATTERN` that behaves as your click, such as one of the metronome patterns
-- if you want the click to start from the `Click` button, the RC-500 ASSIGNs above need to be enabled on the looper
-- the RC500 bank expression preset now sends `CC26` on channel `9`, so assigning `CC26 -> RHYTHM LEV2` lets the MC6 expression pedal control click volume
+- enable the RC-500 ASSIGNs above so the generated `Arm`, `Start`, `Tmp -`, and `Tmp +` buttons work as intended
+- the RC500 bank expression preset sends `CC26` on channel `9`, so assigning `CC26 -> RHYTHM LEV2` lets the MC6 expression pedal control click volume
 
 ### Proposed Delay Manual Bank
 

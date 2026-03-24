@@ -360,29 +360,31 @@
       "Long-press actions should be used for setup or less-common functions."
     ],
     "rc500CurrentPlan": {
-      "summary": "The current generated file includes a dedicated RC-500 bank for clock, preset recall, and assign-driven looper control.",
+      "summary": "The current generated file includes a dedicated RC-500 bank for tempo, rhythm arm/unarm, transport start/stop, and click-volume control.",
       "midiChannelForPcAndCc": 9,
       "notes": [
         "MIDI clock itself is channel-free, so the clock test does not depend on channel 9.",
-        "The RC-500 bank assumes the looper is configured to receive Program Change and Control Change on MIDI channel 9."
+        "The RC-500 bank assumes the looper is configured to receive Control Change on MIDI channel 9.",
+        "The tap button on the RC-500 bank should behave exactly like the global tap buttons elsewhere on the controller.",
+        "The RC-500 bank expression preset sends CC26 on channel 9 for click-volume control."
       ],
       "requiredRc500Settings": [
         "Set SYNC CLOCK to MIDI or AUTO so the looper follows MC6 clock.",
         "Choose a rhythm pattern that behaves as the metronome click.",
-        "Enable the ASSIGN entries below on the RC-500 if the generated Click, Play, Stop, Tempo Up, Tempo Down, and Start buttons should work."
+        "Enable the ASSIGN entries below on the RC-500 if the generated Arm, Start, Tempo Up, and Tempo Down buttons should work."
       ],
       "suggestedAssignMap": [
         {
           "cc": 20,
-          "target": "RHYTHM P/S"
-        },
-        {
-          "cc": 21,
           "target": "RHYTHM PLAY"
         },
         {
-          "cc": 22,
+          "cc": 21,
           "target": "RHYTHM STOP"
+        },
+        {
+          "cc": 22,
+          "target": "transport START/STOP target"
         },
         {
           "cc": 23,
@@ -391,10 +393,6 @@
         {
           "cc": 24,
           "target": "TEMPO UP"
-        },
-        {
-          "cc": 25,
-          "target": "ALL START"
         },
         {
           "cc": 26,

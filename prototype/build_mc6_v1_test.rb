@@ -209,12 +209,11 @@ EXPRESSION_PRESET_INDEX = 3
 RELAY_PORT_A = 4
 RELAY_ACTION_NOTHING = 0
 RELAY_ACTION_SYNC_CLOCK_8_TAPS = 6
-RC500_CC_CLICK_TOGGLE = 20
-RC500_CC_RHYTHM_PLAY = 21
-RC500_CC_RHYTHM_STOP = 22
+RC500_CC_RHYTHM_PLAY = 20
+RC500_CC_RHYTHM_STOP = 21
+RC500_CC_TRANSPORT_TOGGLE = 22
 RC500_CC_TEMPO_DOWN = 23
 RC500_CC_TEMPO_UP = 24
-RC500_CC_ALL_START = 25
 RC500_CC_RHYTHM_LEVEL = 26
 
 def deep_clone(obj)
@@ -422,6 +421,32 @@ end
 def style_rc500_test_preset!(bank, preset_num, label, background_color:)
   style_static_preset!(bank, preset_num, label, background_color: background_color, text_color: LEVEL_BUTTON_TEXT_COLOR)
   bank["presetArray"][preset_num]["ledColor"] = EFFECT_ON_LED_COLOR
+end
+
+def set_rc500_tempo_adjust_preset!(bank, preset_num, label, cc_number, background_color:)
+  style_rc500_test_preset!(bank, preset_num, label, background_color: background_color)
+  # Use Release for short taps and Long Press for the +5/-5 behavior so long holds
+  # do not also fire the short single-step action.
+  set_cc!(bank, preset_num, 0, RC500_CHANNEL, cc_number, 127, action: 2)
+  5.times do |index|
+    set_cc!(bank, preset_num, index + 1, RC500_CHANNEL, cc_number, 127, action: 3)
+  end
+end
+
+def set_rc500_toggle_preset!(bank, preset_num, short_name, toggle_name, first_cc, second_cc, background_color:)
+  preset = bank["presetArray"][preset_num]
+  preset["shortName"] = short_name
+  preset["toggleName"] = toggle_name
+  preset["toToggle"] = true
+  preset["backgroundColor"] = background_color
+  preset["toggleBackgroundColor"] = background_color
+  preset["nameColor"] = LEVEL_BUTTON_TEXT_COLOR
+  preset["nameToggleColor"] = LEVEL_BUTTON_TEXT_COLOR
+  preset["ledColor"] = EFFECT_OFF_LED_COLOR
+  preset["ledToggleColor"] = EFFECT_ON_LED_COLOR
+
+  set_cc!(bank, preset_num, 0, RC500_CHANNEL, first_cc, 127, position: POSITION_1)
+  set_cc!(bank, preset_num, 1, RC500_CHANNEL, second_cc, 127, position: POSITION_2)
 end
 
 def set_toggle_cc_preset!(bank, preset_num, short_name, toggle_name, channel, cc_off, value_off, cc_on, value_on)
@@ -808,30 +833,12 @@ end
 set_cc_scroll_preset!(tape_bank, 4, "Mode %G", DECO_CHANNEL, 11, DECO_TAPE_MODE_SCROLL, background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Heavy"))
 configure_expression_preset!(tape_bank, "Tape Expr", TAPE_EXPRESSION)
 
-# RC-500 test bank
+# RC-500 bank
 rc500_bank = output["data"]["bankArray"][RC500_BANK]
-style_rc500_test_preset!(rc500_bank, 0, "Clock", background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Light"))
-set_midi_clock_tap!(rc500_bank, 0, 0, action: 1)
-
-set_pc_scroll_preset!(rc500_bank, 1, "Prst %G", RC500_CHANNEL, DELAY_MANUAL_SCROLLS[:preset_scroll], background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Medium"))
-
-style_rc500_test_preset!(rc500_bank, 3, "Click", background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Med Heavy"))
-set_cc!(rc500_bank, 3, 0, RC500_CHANNEL, RC500_CC_CLICK_TOGGLE, 127, action: 1)
-
-style_rc500_test_preset!(rc500_bank, 4, "Play", background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Heavy"))
-set_cc!(rc500_bank, 4, 0, RC500_CHANNEL, RC500_CC_RHYTHM_PLAY, 127, action: 1)
-
-style_rc500_test_preset!(rc500_bank, 6, "Tmp -", background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Light"))
-set_cc!(rc500_bank, 6, 0, RC500_CHANNEL, RC500_CC_TEMPO_DOWN, 127, action: 1)
-
-style_rc500_test_preset!(rc500_bank, 7, "Tmp +", background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Medium"))
-set_cc!(rc500_bank, 7, 0, RC500_CHANNEL, RC500_CC_TEMPO_UP, 127, action: 1)
-
-style_rc500_test_preset!(rc500_bank, 9, "Stop", background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Med Heavy"))
-set_cc!(rc500_bank, 9, 0, RC500_CHANNEL, RC500_CC_RHYTHM_STOP, 127, action: 1)
-
-style_rc500_test_preset!(rc500_bank, 10, "Start", background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Heavy"))
-set_cc!(rc500_bank, 10, 0, RC500_CHANNEL, RC500_CC_ALL_START, 127, action: 1)
+set_rc500_tempo_adjust_preset!(rc500_bank, 0, "Tmp -", RC500_CC_TEMPO_DOWN, background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Light"))
+set_rc500_tempo_adjust_preset!(rc500_bank, 1, "Tmp +", RC500_CC_TEMPO_UP, background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Medium"))
+set_rc500_toggle_preset!(rc500_bank, 3, "Arm", "Unarm", RC500_CC_RHYTHM_PLAY, RC500_CC_RHYTHM_STOP, background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Med Heavy"))
+set_rc500_toggle_preset!(rc500_bank, 4, "Start", "Stop", RC500_CC_TRANSPORT_TOGGLE, RC500_CC_TRANSPORT_TOGGLE, background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Heavy"))
 configure_expression_preset!(rc500_bank, "RC500 Expr", RC500_EXPRESSION)
 
 # Delay Manual A bank
