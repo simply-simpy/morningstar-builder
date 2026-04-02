@@ -2,7 +2,9 @@
 
 This folder contains the working design for a Morningstar MC6 Pro setup focused on Strymon pedals.
 
-The main structured planning file is [mc6pro_functional_design.json](/Users/scott/Library/CloudStorage/Dropbox/morningstar/mc6pro_functional_design.json).
+The main structured planning file is [mc6pro_functional_design.json](/Users/scott/Sites/morningstar/prototype/mc6pro_functional_design.json).
+
+There is also a clickable planning mockup at [mc6_layout_mockup.html](/Users/scott/Sites/morningstar/prototype/mc6_layout_mockup.html). It is a human-facing web representation of the current MC6 layout plus a few proposed multi-page bank ideas, especially for RC-500.
 
 ## Current Scope
 
@@ -91,10 +93,10 @@ Pedals entry buttons should mirror the destination effect page color:
 
 The current MC6 Pro omniport configuration should be treated as part of the baseline controller setup:
 
-- `Omniport 1` = `MIDI Out - Type A (Standard)`
+- `Omniport 1` = `Expression`
 - `Omniport 2` = `MIDI Out - Type A (Standard)`
 - `Omniport 3` = `MIDI Out - Type A (Standard)`
-- `Omniport 4` = `Expression`
+- `Omniport 4` = `MIDI Out - Type A (Standard)`
 
 The generator now preserves that layout explicitly, based on the re-exported Morningstar backup after those settings were adjusted in the editor.
 
@@ -142,11 +144,11 @@ The generated delay buttons now behave as:
 
 Additional EC-1 rule:
 
-- `Delay Light` now sends `CC63 = 0` on Position 1 so MIDI Clock follow is off
-- `Delay Light` sends `CC63 = 127` on Position 2 so clock follow is restored when the toggle is turned off
+- `Delay Slapback` now sends `CC63 = 0` on Position 1 so MIDI Clock follow is off
+- `Delay Slapback` sends `CC63 = 127` on Position 2 so clock follow is restored when the toggle is turned off
 - `Delay Medium`, `Delay Med Heavy`, and `Delay Heavy` each send `CC63 = 127` on Position 1 so selecting another delay sound restores clock follow
 - The universal `Tap` buttons no longer send direct `CC93` tap to the EC-1
-- Tap now updates the MC6 internal MIDI clock instead, so clock-following delay presets move with tempo while `Delay Light` can stay fixed as slapback
+- Tap now updates the MC6 internal MIDI clock instead, so clock-following delay presets move with tempo while `Delay Slapback` can stay fixed
 
 ### RC-500
 
@@ -163,26 +165,28 @@ Additional EC-1 rule:
 - MIDI clock itself is channel-free, but the RC-500 preset and CC buttons assume the looper is set to receive on channel `9`
 - `Tmp -` and `Tmp +` are momentary tempo nudges:
 - short press changes by `1 BPM`
-- long press sends five repeats for a `5 BPM` jump
+- they now use the exact working Morningstar utility-style message from the April 2 backup instead of RC-500 CC assigns
 - `Tap` is the same global tap macro used elsewhere on the controller
 - `Arm` is a true toggle: Position 1 arms rhythm, Position 2 unarms it
 - `Start` is a separate transport toggle: Position 1 starts transport, Position 2 stops it
 - The RC500 bank expression preset sends `CC26` on channel `9` for click volume control
+- The generated `Arm` and `Start` buttons still send Boss-style momentary CC pulses: `127` followed by `0`
+- RC-500 ASSIGN settings are memory-specific, so if one memory ignores these buttons, copy or save the ASSIGN template into that memory
 
 Suggested RC-500 ASSIGN map for the current generated bank:
 
 - `CC20` -> `RHYTHM PLAY`
 - `CC21` -> `RHYTHM STOP`
 - `CC22` -> transport `START/STOP` style target
-- `CC23` -> `TEMPO DOWN`
-- `CC24` -> `TEMPO UP`
 - `CC26` -> `RHYTHM LEV2`
 
 Recommended RC-500 settings for this bank:
 
 - `SYNC CLOCK = MIDI` or `AUTO`
 - choose a `RHYTHM PATTERN` that behaves as your click, such as one of the metronome patterns
-- enable the RC-500 ASSIGNs above so the generated `Arm`, `Start`, `Tmp -`, and `Tmp +` buttons work as intended
+- for the CC-based controls, set `SRC MODE = MOMENTARY` on the RC-500 ASSIGN entries
+- enable the RC-500 ASSIGNs above so the generated `Arm` and `Start` buttons work as intended
+- `Tmp -` and `Tmp +` now change the MC6 clock directly, so they do not need RC-500 ASSIGN targets
 - the RC500 bank expression preset sends `CC26` on channel `9`, so assigning `CC26 -> RHYTHM LEV2` lets the MC6 expression pedal control click volume
 
 ### Proposed Delay Manual Bank
@@ -219,7 +223,7 @@ Recommended scroll jobs:
 Expression note for a future `Delay Manual` bank:
 
 - Because the current MC6 expression setup is bank-wide, one manual page should only have one expression job at a time
-- If you want expression in a manual workflow, the best pattern is separate sub-pages like `Delay Mix`, `Delay Repeats`, `Delay Age`, and `Delay Mechanics`, each with its own expression assignment on Omniport 4
+- If you want expression in a manual workflow, the best pattern is separate sub-pages like `Delay Mix`, `Delay Repeats`, `Delay Age`, and `Delay Mechanics`, each with its own expression assignment on Omniport 1
 - For a first pass, `Delay Manual` should probably stay button-and-scroll based, while the normal `Delay` bank keeps expression on `Mix + Repeats`
 
 Important EC-1 constraint:
@@ -237,10 +241,10 @@ Current generated implementation:
 
 ## Expression
 
-The current generated file uses controller-side expression on `Omniport 4`, on a per-bank basis:
+The current generated file uses controller-side expression on `Omniport 1`, on a per-bank basis:
 
 - `Reverb` bank expression = Flint `Mix` and `Decay`
-- `Tremolo` bank expression = Flint `Intensity` and a small `Boost`
+- `Tremolo` bank expression = Flint `Intensity`
 - `Delay` bank expression = EC-1 `Mix` and `Repeats`
 - `Doubler` bank expression = Deco `Lag Time`, `Blend`, and `Wobble`
 
@@ -280,7 +284,7 @@ Navigation button styling:
 
 Start tracking pedals or sounds that should normally stay engaged:
 
-- `Delay Light` is the first current `always on` sound
+- `Delay Slapback` is the first current `always on` sound
 
 ### Deco
 

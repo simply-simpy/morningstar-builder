@@ -1,0 +1,1048 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MC6 Layout Mockup</title>
+  <style>
+    :root {
+      --bg: #0f1218;
+      --panel: #171b23;
+      --panel-2: #1f2530;
+      --border: #303847;
+      --text: #f2f3f5;
+      --muted: #a9b0bb;
+      --accent: #e0b04f;
+      --tap-bg: #bf9a72;
+      --tap-text: #111111;
+      --back-bg: #2f7a47;
+      --back-text: #ffffff;
+      --home-bg: #2c628f;
+      --pedals-bg: #bf6f1f;
+      --ableton-bg: #7d7e4a;
+      --songs-bg: #5f6474;
+      --reverb-bg: #2c8b89;
+      --trem-bg: #6a1f2e;
+      --delay-bg: #b45f8a;
+      --doubler-bg: #c5a81b;
+      --tape-bg: #c5a81b;
+      --rc500-bg: #2c628f;
+      --purple-1: #46376f;
+      --purple-2: #5b4592;
+      --purple-3: #7554b3;
+      --purple-4: #8f63cf;
+      --shadow: 0 16px 42px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Avenir Next", "Trebuchet MS", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(224, 176, 79, 0.08), transparent 28%),
+        linear-gradient(180deg, #11141b 0%, #0b0e14 100%);
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: minmax(360px, 760px) minmax(280px, 420px);
+      gap: 24px;
+      align-items: start;
+      padding: 28px;
+    }
+
+    .hero,
+    .panel {
+      background: rgba(23, 27, 35, 0.92);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 24px;
+    }
+
+    .title-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      letter-spacing: 0.02em;
+    }
+
+    .subtitle {
+      margin-top: 8px;
+      color: var(--muted);
+      line-height: 1.45;
+      max-width: 56rem;
+    }
+
+    .action-toggle {
+      display: inline-flex;
+      gap: 8px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px;
+      align-self: start;
+    }
+
+    .action-toggle button,
+    .mini-button,
+    .page-chip {
+      appearance: none;
+      border: 0;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .action-toggle button {
+      padding: 10px 16px;
+      border-radius: 999px;
+      color: var(--muted);
+      background: transparent;
+      transition: 160ms ease;
+    }
+
+    .action-toggle button.active {
+      color: #111;
+      background: var(--accent);
+      font-weight: 700;
+    }
+
+    .device-wrap {
+      display: grid;
+      gap: 18px;
+    }
+
+    .screen-meta {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 16px 18px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0));
+    }
+
+    .screen-meta h2 {
+      font-size: 1.45rem;
+    }
+
+    .meta-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+
+    .badge.current {
+      background: rgba(47, 122, 71, 0.18);
+      color: #d9f3df;
+    }
+
+    .badge.current-ish {
+      background: rgba(61, 95, 155, 0.2);
+      color: #d8e5ff;
+    }
+
+    .badge.proposed {
+      background: rgba(224, 176, 79, 0.18);
+      color: #f9e6b5;
+    }
+
+    .mc6 {
+      position: relative;
+      padding: 26px;
+      border-radius: 28px;
+      border: 1px solid #455063;
+      background:
+        linear-gradient(180deg, #262d38 0%, #171c25 100%);
+      overflow: hidden;
+    }
+
+    .mc6::before {
+      content: "";
+      position: absolute;
+      inset: 10px;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.05);
+      pointer-events: none;
+    }
+
+    .device-screen {
+      padding: 18px 18px 16px;
+      border-radius: 18px;
+      min-height: 120px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(0,0,0,0.08));
+      margin-bottom: 18px;
+    }
+
+    .device-screen p {
+      color: rgba(255,255,255,0.88);
+      line-height: 1.4;
+    }
+
+    .device-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .switch {
+      min-height: 118px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.14);
+      padding: 12px;
+      text-align: left;
+      background: var(--panel-2);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: inset 0 -14px 18px rgba(0, 0, 0, 0.18);
+      transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+    }
+
+    .switch:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,0.24);
+      box-shadow: inset 0 -14px 18px rgba(0, 0, 0, 0.18), 0 12px 28px rgba(0, 0, 0, 0.18);
+    }
+
+    .switch.active {
+      outline: 2px solid rgba(255,255,255,0.35);
+    }
+
+    .slot {
+      display: inline-flex;
+      width: 28px;
+      height: 28px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.18);
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .label {
+      font-size: 1.02rem;
+      line-height: 1.2;
+      font-weight: 700;
+    }
+
+    .subtext {
+      color: rgba(255,255,255,0.8);
+      font-size: 0.84rem;
+      line-height: 1.25;
+    }
+
+    .switch.tap {
+      background: linear-gradient(180deg, color-mix(in srgb, var(--tap-bg) 92%, white 8%), var(--tap-bg));
+      color: var(--tap-text);
+    }
+
+    .switch.back {
+      background: linear-gradient(180deg, #3b9559, var(--back-bg));
+      color: var(--back-text);
+    }
+
+    .switch.home {
+      background: linear-gradient(180deg, #4b87b7, var(--home-bg));
+    }
+
+    .switch.ableton {
+      background: linear-gradient(180deg, #8d8d57, var(--ableton-bg));
+      color: #111;
+    }
+
+    .switch.pedals {
+      background: linear-gradient(180deg, #e28b33, var(--pedals-bg));
+    }
+
+    .switch.songs {
+      background: linear-gradient(180deg, #70778a, var(--songs-bg));
+    }
+
+    .switch.reverb {
+      background: linear-gradient(180deg, #3aa7a4, var(--reverb-bg));
+      color: #091416;
+    }
+
+    .switch.trem {
+      background: linear-gradient(180deg, #7f2839, var(--trem-bg));
+    }
+
+    .switch.delay {
+      background: linear-gradient(180deg, #cf759f, var(--delay-bg));
+      color: #1b0f16;
+    }
+
+    .switch.doubler,
+    .switch.tape {
+      background: linear-gradient(180deg, #dac13b, var(--doubler-bg));
+      color: #221d0d;
+    }
+
+    .switch.level-light {
+      background: linear-gradient(180deg, #5c4690, var(--purple-1));
+    }
+
+    .switch.level-medium {
+      background: linear-gradient(180deg, #7054b2, var(--purple-2));
+    }
+
+    .switch.level-med-heavy {
+      background: linear-gradient(180deg, #8861d2, var(--purple-3));
+    }
+
+    .switch.level-heavy {
+      background: linear-gradient(180deg, #a174f0, var(--purple-4));
+    }
+
+    .switch.utility {
+      background: linear-gradient(180deg, #3b4658, #283243);
+    }
+
+    .page-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .page-chip {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      transition: 140ms ease;
+    }
+
+    .page-chip.active {
+      color: #111;
+      background: var(--accent);
+      border-color: transparent;
+      font-weight: 700;
+    }
+
+    .page-chip small {
+      display: block;
+      font-size: 0.72rem;
+      color: inherit;
+      opacity: 0.85;
+    }
+
+    .panel {
+      padding: 22px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .panel h2 {
+      font-size: 1.15rem;
+    }
+
+    .detail-box,
+    .tree,
+    .note-box {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+      border-radius: 18px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+    }
+
+    .detail-box p,
+    .note-box p,
+    .tree li {
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .detail-box strong,
+    .note-box strong {
+      color: var(--text);
+    }
+
+    .mini-button {
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      text-align: left;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .tree-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 8px;
+    }
+
+    .tree-list button {
+      width: 100%;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    code {
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.06);
+      font-family: Menlo, Monaco, monospace;
+      font-size: 0.92em;
+    }
+
+    @media (max-width: 1100px) {
+      .shell {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="title-row">
+        <div>
+          <h1>MC6 Layout Mockup</h1>
+          <p class="subtitle">
+            A clickable planning view for the current MC6 layout plus a few proposed multi-page banks.
+            Buttons navigate like the controller. The action mode lets you test <code>Press</code> vs <code>Hold</code>
+            so long-hold destinations such as Delay Tools and Tape are visible too.
+          </p>
+        </div>
+        <div class="action-toggle" aria-label="Action Mode">
+          <button type="button" class="active" data-action-mode="press">Press</button>
+          <button type="button" data-action-mode="hold">Hold</button>
+        </div>
+      </div>
+
+      <div class="device-wrap">
+        <div class="screen-meta">
+          <div>
+            <h2 id="screenTitle">Home</h2>
+            <div class="meta-line">
+              <span id="screenPath">Bank 1</span>
+              <span id="screenSubtitle">Global landing page</span>
+            </div>
+          </div>
+          <div class="badge current" id="screenStatus">Current</div>
+        </div>
+
+        <section class="mc6" aria-label="MC6 Controller Mockup">
+          <div class="device-screen">
+            <p id="screenMessage">
+              Four flexible slots per page once <code>C = Tap</code> and <code>F = Back/Home</code> are reserved.
+              The physical bottom row starts at <code>A</code>, and each new page continues the lettering:
+              <code>A-F</code>, then <code>G-L</code>, then <code>M-R</code>, then <code>S-X</code>.
+            </p>
+          </div>
+          <div class="device-grid" id="switchGrid"></div>
+          <div class="page-nav" id="pageNav"></div>
+        </section>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <section class="detail-box">
+        <h2>Button Details</h2>
+        <p id="selectedTitle"><strong>No button selected yet.</strong></p>
+        <p id="selectedBody">Click any switch in the mockup to inspect its behavior.</p>
+      </section>
+
+      <section class="tree">
+        <h2>Bank Map</h2>
+        <ul class="tree-list" id="treeList"></ul>
+      </section>
+
+      <section class="note-box">
+        <h2>Why Pages Matter</h2>
+        <p>
+          With <code>Tap</code> on <code>C</code> and <code>Back/Home</code> on <code>F</code>, every page only has
+          <strong>4 free slots</strong> for effect actions. The mockup uses multi-page banks to show how you can keep
+          the navigation rules fixed while giving RC-500 or Delay deeper menu surfaces.
+        </p>
+        <p>
+          Current mockup split:
+          <strong>Home / Pedals / core effect pages</strong> are close to the live export.
+          <strong>RC500 page 2-4</strong> and <strong>Delay Tools page grouping</strong> are proposed planner views.
+        </p>
+      </section>
+    </aside>
+  </main>
+
+  <script>
+    const reservedButtons = {
+      tap: {
+        label: "Tap",
+        tone: "tap",
+        description: "Global tap tempo. In the live layout this updates MC6 clock, relay tempo, and Flint remote tap."
+      },
+      back: {
+        label: "\\- Back",
+        tone: "back",
+        description: "Release returns to the last used bank. Hold jumps to the global Home screen."
+      },
+      home: {
+        label: "Home",
+        tone: "home",
+        description: "Global Home landing action."
+      }
+    };
+
+    function btn(label, tone, description, options = {}) {
+      return { label, tone, description, ...options };
+    }
+
+    function page(title, status, theme, note, buttons) {
+      return { title, status, theme, note, buttons };
+    }
+
+    const banks = {
+      home: {
+        title: "Home",
+        bankNumber: 1,
+        pages: [
+          page(
+            "Global Home",
+            "current",
+            "home",
+            "Top-level landing page. This is the safest place to re-orient before diving into pedal or looper control.",
+            {
+              A: btn("Ableton", "ableton", "Jump to the Ableton home bank.", { target: { bank: "ableton", page: 0 } }),
+              B: btn("Pedals", "pedals", "Jump to the Main Pedals context bank.", { target: { bank: "pedals", page: 0 } }),
+              C: { ...reservedButtons.tap },
+              D: btn("Songs", "songs", "Placeholder song list bank.", { target: { bank: "songs", page: 0 } }),
+              E: btn("RC500", "home", "Jump to the RC-500 control bank.", { target: { bank: "rc500", page: 0 } }),
+              F: { ...reservedButtons.home }
+            }
+          )
+        ]
+      },
+      ableton: {
+        title: "Ableton",
+        bankNumber: 2,
+        pages: [
+          page(
+            "Ableton Home",
+            "current",
+            "ableton",
+            "Minimal home page for the two looper contexts.",
+            {
+              A: btn("Gtr Lpr", "ableton", "Jump to the Ableton Guitar looper page."),
+              B: btn("Voice Lpr", "ableton", "Jump to the Ableton Voice looper page."),
+              C: { ...reservedButtons.tap },
+              D: btn("Reserved", "utility", "Open slot for future Ableton control."),
+              E: btn("Reserved", "utility", "Open slot for future Ableton control."),
+              F: { ...reservedButtons.back, target: { bank: "home", page: 0 } }
+            }
+          )
+        ]
+      },
+      pedals: {
+        title: "Pedals",
+        bankNumber: 3,
+        pages: [
+          page(
+            "Main Pedals",
+            "current",
+            "pedals",
+            "Primary pedal home. Delay and Doubler expose deeper hold actions for their tool pages.",
+            {
+              A: btn("Reverb", "reverb", "Jump to the Flint Reverb bank.", { target: { bank: "reverb", page: 0 } }),
+              B: btn("Tremolo", "trem", "Jump to the Flint Tremolo bank.", { target: { bank: "tremolo", page: 0 } }),
+              C: { ...reservedButtons.tap },
+              D: btn("Delay", "delay", "Press opens the delay scene page. Hold opens Delay Tools.", {
+                target: { bank: "delay", page: 0 },
+                holdTarget: { bank: "delayTools", page: 0 },
+                holdDescription: "Hold to jump into the deeper Delay Tools pages."
+              }),
+              E: btn("Doubler", "doubler", "Press opens the Doubler bank. Hold opens Tape.", {
+                target: { bank: "doubler", page: 0 },
+                holdTarget: { bank: "tape", page: 0 },
+                holdDescription: "Hold to jump into Tape controls."
+              }),
+              F: { ...reservedButtons.back, target: { bank: "home", page: 0 } }
+            }
+          )
+        ]
+      },
+      songs: {
+        title: "Songs",
+        bankNumber: 4,
+        pages: [
+          page(
+            "Songs",
+            "planned",
+            "songs",
+            "Placeholder song mode. This is where combined RC-500 memory + pedal scene recall will likely live.",
+            {
+              A: btn("Song 1", "songs", "Future explicit song scene."),
+              B: btn("Song 2", "songs", "Future explicit song scene."),
+              C: { ...reservedButtons.tap },
+              D: btn("Song 3", "songs", "Future explicit song scene."),
+              E: btn("Song 4", "songs", "Future explicit song scene."),
+              F: { ...reservedButtons.back, target: { bank: "home", page: 0 } }
+            }
+          )
+        ]
+      },
+      reverb: {
+        title: "Reverb",
+        bankNumber: 51,
+        pages: [
+          page(
+            "Flint Reverb",
+            "current",
+            "reverb",
+            "Independent Flint reverb macros. Expression on this page is Mix + Decay.",
+            {
+              A: btn("Light", "level-light", "Low reverb mix/decay scene."),
+              B: btn("Medium", "level-medium", "Default reverb scene."),
+              C: { ...reservedButtons.tap },
+              D: btn("Med Heavy", "level-med-heavy", "Bigger reverb scene with more decay."),
+              E: btn("Heavy", "level-heavy", "Largest reverb scene."),
+              F: { ...reservedButtons.back, target: { bank: "pedals", page: 0 } }
+            }
+          )
+        ]
+      },
+      tremolo: {
+        title: "Tremolo",
+        bankNumber: 52,
+        pages: [
+          page(
+            "Flint Tremolo",
+            "current",
+            "trem",
+            "Tremolo page keeps A for subdivision scroll and uses lighter intensity on Light/Medium than before. Expression is now intensity only.",
+            {
+              A: btn("Div %G", "utility", "Subdivision scroll for 1/4, 1/8, Triplet, and 1/16."),
+              B: btn("Light", "level-light", "Lower-intensity tremolo scene."),
+              C: { ...reservedButtons.tap },
+              D: btn("Medium", "level-medium", "Medium-intensity tremolo scene."),
+              E: btn("Heavy", "level-heavy", "High-intensity tremolo scene."),
+              F: { ...reservedButtons.back, target: { bank: "pedals", page: 0 } }
+            }
+          )
+        ]
+      },
+      delay: {
+        title: "Delay",
+        bankNumber: 53,
+        pages: [
+          page(
+            "EC-1 Delay",
+            "current",
+            "delay",
+            "Slapback is the fixed-time delay. It turns clock-follow off on engage and restores it when the preset is released or changed.",
+            {
+              A: btn("Slapback", "level-light", "Fixed-time slapback scene."),
+              B: btn("Medium", "level-medium", "General-purpose clock-following delay."),
+              C: { ...reservedButtons.tap },
+              D: btn("Med Heavy", "level-med-heavy", "Bigger delay scene."),
+              E: btn("Heavy", "level-heavy", "Most ambient lead delay scene."),
+              F: { ...reservedButtons.back, target: { bank: "pedals", page: 0 } }
+            }
+          )
+        ]
+      },
+      delayTools: {
+        title: "Delay Tools",
+        bankNumber: 55,
+        pages: [
+          page(
+            "Delay Tools 1",
+            "current-ish",
+            "delay",
+            "This groups the current Delay Manual A ideas into page 1 of a deeper tool bank.",
+            {
+              A: btn("Mix %G", "utility", "Scroll delay mix."),
+              B: btn("Rpts %G", "utility", "Scroll repeats."),
+              C: { ...reservedButtons.tap },
+              D: btn("Age %G", "utility", "Scroll tape age."),
+              E: btn("Mech %G", "utility", "Scroll mechanics."),
+              F: { ...reservedButtons.back, target: { bank: "pedals", page: 0 } }
+            }
+          ),
+          page(
+            "Delay Tools 2",
+            "current-ish",
+            "delay",
+            "Second page of deeper delay controls. A good example of using pages when C/F stay reserved.",
+            {
+              A: btn("Lvl %G", "utility", "Scroll record level."),
+              B: btn("Pre %G", "utility", "Scroll preamp voice."),
+              C: { ...reservedButtons.tap },
+              D: btn("Div %G", "utility", "Scroll tap division."),
+              E: btn("Prst %G", "utility", "Scroll a bounded EC-1 preset range."),
+              F: { ...reservedButtons.back, target: { bank: "pedals", page: 0 } }
+            }
+          )
+        ]
+      },
+      doubler: {
+        title: "Doubler",
+        bankNumber: 54,
+        pages: [
+          page(
+            "Deco Doubler",
+            "current",
+            "doubler",
+            "Preset-based Doubler page. Expression is Lag Time + Blend + Wobble.",
+            {
+              A: btn("Light", "level-light", "Light Doubletracker preset."),
+              B: btn("Medium", "level-medium", "Medium Doubletracker preset."),
+              C: { ...reservedButtons.tap },
+              D: btn("Med Heavy", "level-med-heavy", "Medium-heavy Doubletracker preset."),
+              E: btn("Heavy", "level-heavy", "Heavy Doubletracker preset."),
+              F: { ...reservedButtons.back, target: { bank: "pedals", page: 0 } }
+            }
+          )
+        ]
+      },
+      tape: {
+        title: "Tape",
+        bankNumber: 57,
+        pages: [
+          page(
+            "Deco Tape",
+            "current",
+            "tape",
+            "Tape side controls. Expression is Saturation + Tone.",
+            {
+              A: btn("Light", "level-light", "Light tape saturation scene."),
+              B: btn("Medium", "level-medium", "Medium tape saturation scene."),
+              C: { ...reservedButtons.tap },
+              D: btn("Heavy", "level-heavy", "Heavy tape saturation scene."),
+              E: btn("Mode %G", "utility", "Scroll Classic vs Cassette."),
+              F: { ...reservedButtons.back, target: { bank: "pedals", page: 0 } }
+            }
+          )
+        ]
+      },
+      rc500: {
+        title: "RC500",
+        bankNumber: 58,
+        pages: [
+          page(
+            "RC500 Home",
+            "current",
+            "home",
+            "Current live RC500 page. A/B now use the working Morningstar utility-style message from the April 2 backup.",
+            {
+              A: btn("Tmp -", "level-light", "Decrement MC6 clock / RC500 song tempo helper."),
+              B: btn("Tmp +", "level-medium", "Increment MC6 clock / RC500 song tempo helper."),
+              C: { ...reservedButtons.tap },
+              D: btn("Arm", "level-med-heavy", "Rhythm arm / unarm toggle."),
+              E: btn("Start", "level-heavy", "Transport start / stop toggle."),
+              F: { ...reservedButtons.back, target: { bank: "home", page: 0 } }
+            }
+          ),
+          page(
+            "RC500 Memories",
+            "proposed",
+            "home",
+            "Proposed page: memory browsing and song recall without giving up the fixed Tap/Back positions.",
+            {
+              A: btn("Mem -", "level-light", "Previous memory."),
+              B: btn("Mem +", "level-medium", "Next memory."),
+              C: { ...reservedButtons.tap },
+              D: btn("Song %G", "utility", "Curated song-memory scroll."),
+              E: btn("Load", "level-heavy", "Load highlighted memory/song."),
+              F: { ...reservedButtons.back, target: { bank: "home", page: 0 } }
+            }
+          ),
+          page(
+            "RC500 Rhythm",
+            "proposed",
+            "home",
+            "Proposed page: drum sounds and click behavior that should stay available regardless of song memory.",
+            {
+              A: btn("Click", "level-light", "Rhythm on / off."),
+              B: btn("Var %G", "utility", "Scroll rhythm variation."),
+              C: { ...reservedButtons.tap },
+              D: btn("Kit %G", "utility", "Scroll rhythm kit / instrument set."),
+              E: btn("Rhy Vol", "level-heavy", "Rhythm volume control surface."),
+              F: { ...reservedButtons.back, target: { bank: "home", page: 0 } }
+            }
+          ),
+          page(
+            "RC500 Tracks + Mix",
+            "proposed",
+            "home",
+            "Proposed page: compressed track and mixer controls so the RC500 plan still fits within the real A-X page limit.",
+            {
+              A: btn("T1 Vol", "level-light", "Track 1 level surface."),
+              B: btn("T2 Vol", "level-medium", "Track 2 level surface."),
+              C: { ...reservedButtons.tap },
+              D: btn("Rec/OD", "level-med-heavy", "Track record / overdub helper."),
+              E: btn("Loop FX", "level-heavy", "Loop FX on / off or track support helper."),
+              F: { ...reservedButtons.back, target: { bank: "home", page: 0 } }
+            }
+          )
+        ]
+      }
+    };
+
+    const treeEntries = [
+      { label: "Home", bank: "home" },
+      { label: "Ableton", bank: "ableton" },
+      { label: "Pedals", bank: "pedals" },
+      { label: "Reverb", bank: "reverb" },
+      { label: "Tremolo", bank: "tremolo" },
+      { label: "Delay", bank: "delay" },
+      { label: "Delay Tools", bank: "delayTools" },
+      { label: "Doubler", bank: "doubler" },
+      { label: "Tape", bank: "tape" },
+      { label: "RC500", bank: "rc500" }
+    ];
+
+    const state = {
+      bank: "home",
+      pageIndex: 0,
+      actionMode: "press",
+      history: []
+    };
+
+    const switchOrder = ["D", "E", "F", "A", "B", "C"];
+    const switchGrid = document.getElementById("switchGrid");
+    const pageNav = document.getElementById("pageNav");
+    const screenTitle = document.getElementById("screenTitle");
+    const screenPath = document.getElementById("screenPath");
+    const screenSubtitle = document.getElementById("screenSubtitle");
+    const screenStatus = document.getElementById("screenStatus");
+    const screenMessage = document.getElementById("screenMessage");
+    const selectedTitle = document.getElementById("selectedTitle");
+    const selectedBody = document.getElementById("selectedBody");
+    const treeList = document.getElementById("treeList");
+
+    function currentBank() {
+      return banks[state.bank];
+    }
+
+    function currentPage() {
+      return currentBank().pages[state.pageIndex];
+    }
+
+    function slotIndex(localSlot) {
+      return localSlot.charCodeAt(0) - 65;
+    }
+
+    function displaySlot(localSlot, pageIndex) {
+      return String.fromCharCode(65 + (pageIndex * 6) + slotIndex(localSlot));
+    }
+
+    function pageRange(pageIndex) {
+      const start = String.fromCharCode(65 + (pageIndex * 6));
+      const end = String.fromCharCode(70 + (pageIndex * 6));
+      return start + "-" + end;
+    }
+
+    function goTo(bank, pageIndex = 0, pushHistory = true) {
+      if (pushHistory) {
+        state.history.push({ bank: state.bank, pageIndex: state.pageIndex });
+      }
+      state.bank = bank;
+      state.pageIndex = pageIndex;
+      render();
+    }
+
+    function goBack() {
+      const previous = state.history.pop();
+      if (previous) {
+        state.bank = previous.bank;
+        state.pageIndex = previous.pageIndex;
+      } else {
+        state.bank = "home";
+        state.pageIndex = 0;
+      }
+      render();
+    }
+
+    function applyButtonAction(slot) {
+      const button = currentPage().buttons[slot];
+      if (!button) return;
+
+      const usingHold = state.actionMode === "hold";
+      const target = usingHold && button.holdTarget ? button.holdTarget : button.target;
+      const effectiveDescription =
+        usingHold && button.holdDescription ? button.holdDescription : button.description;
+
+      const shownSlot = displaySlot(slot, state.pageIndex);
+      selectedTitle.innerHTML = "<strong>" + shownSlot + " - " + button.label + "</strong>";
+      selectedBody.textContent =
+        (usingHold ? "Hold: " : "Press: ") + effectiveDescription;
+
+      if (slot === "F" && currentBank().title !== "Home" && state.actionMode === "press") {
+        goBack();
+        return;
+      }
+
+      if (slot === "F" && state.actionMode === "hold") {
+        state.bank = "home";
+        state.pageIndex = 0;
+        render();
+        return;
+      }
+
+      if (button.label === "Home") {
+        state.bank = "home";
+        state.pageIndex = 0;
+        render();
+        return;
+      }
+
+      if (target) {
+        goTo(target.bank, target.page || 0);
+      }
+    }
+
+    function renderPageChips() {
+      pageNav.innerHTML = "";
+      const bank = currentBank();
+      if (bank.pages.length === 1) return;
+
+      bank.pages.forEach((pageInfo, index) => {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "page-chip" + (index === state.pageIndex ? " active" : "");
+        chip.innerHTML =
+          "Page " + (index + 1) + "<small>" + pageRange(index) + " · " + pageInfo.title + "</small>";
+        chip.addEventListener("click", () => {
+          state.pageIndex = index;
+          render();
+        });
+        pageNav.appendChild(chip);
+      });
+    }
+
+    function renderTree() {
+      treeList.innerHTML = "";
+      treeEntries.forEach((entry) => {
+        const item = document.createElement("li");
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "mini-button";
+        button.textContent = entry.label;
+        button.addEventListener("click", () => {
+          state.bank = entry.bank;
+          state.pageIndex = 0;
+          render();
+        });
+        item.appendChild(button);
+        treeList.appendChild(item);
+      });
+    }
+
+    function render() {
+      const bank = currentBank();
+      const pageInfo = currentPage();
+
+      screenTitle.textContent = bank.title;
+      screenPath.textContent =
+        "Bank " + bank.bankNumber +
+        " - Page " + (state.pageIndex + 1) +
+        " of " + bank.pages.length +
+        " (" + pageRange(state.pageIndex) + ")";
+      screenSubtitle.textContent = pageInfo.title;
+      screenMessage.textContent = pageInfo.note;
+
+      const statusLabel =
+        pageInfo.status === "current"
+          ? "Current"
+          : pageInfo.status === "current-ish"
+            ? "Current-ish"
+            : "Proposed";
+      screenStatus.textContent = statusLabel;
+      screenStatus.className = "badge " + pageInfo.status;
+
+      switchGrid.innerHTML = "";
+      switchOrder.forEach((slot) => {
+        const buttonInfo = pageInfo.buttons[slot];
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "switch";
+
+        if (buttonInfo.tone) {
+          button.classList.add(buttonInfo.tone);
+        }
+
+        const shownSlot = displaySlot(slot, state.pageIndex);
+        button.innerHTML =
+          "<span class=\"slot\">" + shownSlot + "</span>" +
+          "<span class=\"label\">" + buttonInfo.label + "</span>" +
+          "<span class=\"subtext\">" +
+            (state.actionMode === "hold" && buttonInfo.holdDescription
+              ? "Hold action"
+              : pageInfo.status === "current"
+                ? "Current layout"
+                : pageInfo.status === "current-ish"
+                  ? "Near-current plan"
+                  : "Proposed page") +
+          "</span>";
+
+        button.addEventListener("click", () => applyButtonAction(slot));
+        switchGrid.appendChild(button);
+      });
+
+      renderPageChips();
+      renderTree();
+    }
+
+    document.querySelectorAll("[data-action-mode]").forEach((button) => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll("[data-action-mode]").forEach((candidate) => {
+          candidate.classList.toggle("active", candidate === button);
+        });
+        state.actionMode = button.dataset.actionMode;
+        render();
+      });
+    });
+
+    render();
+  </script>
+</body>
+</html>

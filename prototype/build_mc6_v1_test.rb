@@ -1,7 +1,7 @@
 require "json"
 require "time"
 
-SOURCE_FILE = "Morningstar_MC6PRO_Contextual_V1_Test_20260314.json"
+SOURCE_FILE = "Morningstar_MC6PRO_All_Banks_Backup_20260402_135339.json"
 OUTPUT_FILE = "Morningstar_MC6PRO_Contextual_V1_Test_20260314.json"
 
 HOME_BANK = 0
@@ -71,9 +71,9 @@ REVERB_LEVELS = {
 }.freeze
 
 TREM_LEVELS = {
-  "Light" => [[10, 127], [11, 2], [12, 28], [15, 64]],
-  "Medium" => TREM_MEDIUM,
-  "Med Heavy" => [[10, 127], [11, 2], [12, 78], [15, 64]],
+  "Light" => [[10, 127], [11, 2], [12, 16], [15, 64]],
+  "Medium" => [[10, 127], [11, 2], [12, 36], [15, 64]],
+  "Med Heavy" => [[10, 127], [11, 2], [12, 58], [15, 64]],
   "Heavy" => [[10, 127], [11, 2], [12, 108], [15, 64]]
 }.freeze
 
@@ -85,7 +85,7 @@ TREM_SUBDIVISION_SCROLL = [
 ].freeze
 
 EC1_LEVELS = {
-  "Light" => 1,
+  "Slapback" => 1,
   "Medium" => 2,
   "Med Heavy" => 3,
   "Heavy" => 4
@@ -126,8 +126,7 @@ REVERB_EXPRESSION = [
 ].freeze
 
 TREM_EXPRESSION = [
-  [FLINT_CHANNEL, 12, 32, 127],
-  [FLINT_CHANNEL, 15, 64, 78]
+  [FLINT_CHANNEL, 12, 16, 127]
 ].freeze
 
 DELAY_EXPRESSION = [
@@ -150,7 +149,7 @@ RC500_EXPRESSION = [
   [RC500_CHANNEL, 26, 0, 127]
 ].freeze
 
-OMNIPORT_TYPES = [5, 5, 5, 1].freeze
+OMNIPORT_TYPES = [1, 5, 5, 5].freeze
 POSITION_1 = 0
 POSITION_2 = 1
 POSITION_BOTH = 2
@@ -176,6 +175,7 @@ HOME_PEDALS_BUTTON_COLOR = 8
 HOME_RC500_BUTTON_COLOR = RC500_BANK_COLOR
 LEVEL_BUTTON_BACKGROUNDS = {
   "Light" => 5,
+  "Slapback" => 5,
   "Medium" => 44,
   "Med Heavy" => 46,
   "Heavy" => 3
@@ -205,16 +205,16 @@ TREM_TOGGLE_RESET_GROUP = 27
 DELAY_TOGGLE_RESET_GROUP = 28
 DOUBLER_TOGGLE_RESET_GROUP = 29
 TAPE_TOGGLE_RESET_GROUP = 30
-EXPRESSION_PRESET_INDEX = 3
+EXPRESSION_PRESET_INDEX = 0
 RELAY_PORT_A = 4
 RELAY_ACTION_NOTHING = 0
 RELAY_ACTION_SYNC_CLOCK_8_TAPS = 6
 RC500_CC_RHYTHM_PLAY = 20
 RC500_CC_RHYTHM_STOP = 21
 RC500_CC_TRANSPORT_TOGGLE = 22
-RC500_CC_TEMPO_DOWN = 23
-RC500_CC_TEMPO_UP = 24
 RC500_CC_RHYTHM_LEVEL = 26
+MC6_BPM_DECREMENT_UTILITY = 3
+MC6_BPM_INCREMENT_UTILITY = 2
 
 def deep_clone(obj)
   JSON.parse(JSON.generate(obj))
@@ -425,12 +425,15 @@ end
 
 def set_rc500_tempo_adjust_preset!(bank, preset_num, label, cc_number, background_color:)
   style_rc500_test_preset!(bank, preset_num, label, background_color: background_color)
-  # Use Release for short taps and Long Press for the +5/-5 behavior so long holds
-  # do not also fire the short single-step action.
-  set_cc!(bank, preset_num, 0, RC500_CHANNEL, cc_number, 127, action: 2)
-  5.times do |index|
-    set_cc!(bank, preset_num, index + 1, RC500_CHANNEL, cc_number, 127, action: 3)
-  end
+  # Match the exact working increment/decrement message type from the April 2 backup.
+  msg = bank["presetArray"][preset_num]["msgArray"][0]
+  msg["c"] = RC500_CHANNEL
+  msg["t"] = 36
+  msg["a"] = 2
+  msg["tg"] = POSITION_BOTH
+  msg["data"] = Array.new(18, 0)
+  msg["data"][0] = cc_number
+  msg["data"][1] = 127
 end
 
 def set_rc500_toggle_preset!(bank, preset_num, short_name, toggle_name, first_cc, second_cc, background_color:)
@@ -445,8 +448,11 @@ def set_rc500_toggle_preset!(bank, preset_num, short_name, toggle_name, first_cc
   preset["ledColor"] = EFFECT_OFF_LED_COLOR
   preset["ledToggleColor"] = EFFECT_ON_LED_COLOR
 
+  # Boss RC-500 ASSIGN sources behave best with a momentary 127 -> 0 pulse.
   set_cc!(bank, preset_num, 0, RC500_CHANNEL, first_cc, 127, position: POSITION_1)
-  set_cc!(bank, preset_num, 1, RC500_CHANNEL, second_cc, 127, position: POSITION_2)
+  set_cc!(bank, preset_num, 1, RC500_CHANNEL, first_cc, 0, position: POSITION_1)
+  set_cc!(bank, preset_num, 2, RC500_CHANNEL, second_cc, 127, position: POSITION_2)
+  set_cc!(bank, preset_num, 3, RC500_CHANNEL, second_cc, 0, position: POSITION_2)
 end
 
 def set_toggle_cc_preset!(bank, preset_num, short_name, toggle_name, channel, cc_off, value_off, cc_on, value_on)
@@ -607,7 +613,7 @@ def set_delay_scene_preset!(bank, preset_num, label, pc_number)
   set_pc!(bank, preset_num, 0, EC1_CHANNEL, pc_number, position: POSITION_1)
   set_cc!(bank, preset_num, 1, EC1_CHANNEL, 102, 127, position: POSITION_1)
 
-  if label == "Light"
+  if label == "Slapback"
     set_cc!(bank, preset_num, 2, EC1_CHANNEL, 63, 0, position: POSITION_1)
     set_cc!(bank, preset_num, 3, EC1_CHANNEL, 102, 0, position: POSITION_2)
     set_cc!(bank, preset_num, 4, EC1_CHANNEL, 63, 127, position: POSITION_2)
@@ -835,8 +841,8 @@ configure_expression_preset!(tape_bank, "Tape Expr", TAPE_EXPRESSION)
 
 # RC-500 bank
 rc500_bank = output["data"]["bankArray"][RC500_BANK]
-set_rc500_tempo_adjust_preset!(rc500_bank, 0, "Tmp -", RC500_CC_TEMPO_DOWN, background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Light"))
-set_rc500_tempo_adjust_preset!(rc500_bank, 1, "Tmp +", RC500_CC_TEMPO_UP, background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Medium"))
+set_rc500_tempo_adjust_preset!(rc500_bank, 0, "Tmp -", MC6_BPM_DECREMENT_UTILITY, background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Light"))
+set_rc500_tempo_adjust_preset!(rc500_bank, 1, "Tmp +", MC6_BPM_INCREMENT_UTILITY, background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Medium"))
 set_rc500_toggle_preset!(rc500_bank, 3, "Arm", "Unarm", RC500_CC_RHYTHM_PLAY, RC500_CC_RHYTHM_STOP, background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Med Heavy"))
 set_rc500_toggle_preset!(rc500_bank, 4, "Start", "Stop", RC500_CC_TRANSPORT_TOGGLE, RC500_CC_TRANSPORT_TOGGLE, background_color: LEVEL_BUTTON_BACKGROUNDS.fetch("Heavy"))
 configure_expression_preset!(rc500_bank, "RC500 Expr", RC500_EXPRESSION)

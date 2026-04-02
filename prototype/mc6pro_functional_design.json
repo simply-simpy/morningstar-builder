@@ -194,7 +194,7 @@
       "omniports": [
         {
           "port": 1,
-          "mode": "MIDI Out - Type A (Standard)",
+          "mode": "Expression",
           "status": "confirmed_by_diff"
         },
         {
@@ -209,13 +209,13 @@
         },
         {
           "port": 4,
-          "mode": "Expression",
+          "mode": "MIDI Out - Type A (Standard)",
           "status": "confirmed_by_diff"
         }
       ],
       "notes": [
         "The re-exported Morningstar backup after manual editor changes should be treated as the controller-settings baseline.",
-        "In the backup JSON, Omniports 1 through 3 use internal type value 5 and Omniport 4 uses internal type value 1.",
+        "In the March 25 backup JSON, Omniport 1 uses internal type value 1 for expression and Omniports 2 through 4 use internal type value 5 for MIDI Out.",
         "Relay Port A is currently used as the analog tempo output for the Unicorn-style univibe tap input."
       ]
     },
@@ -366,12 +366,16 @@
         "MIDI clock itself is channel-free, so the clock test does not depend on channel 9.",
         "The RC-500 bank assumes the looper is configured to receive Control Change on MIDI channel 9.",
         "The tap button on the RC-500 bank should behave exactly like the global tap buttons elsewhere on the controller.",
-        "The RC-500 bank expression preset sends CC26 on channel 9 for click-volume control."
+        "The RC-500 bank expression preset sends CC26 on channel 9 for click-volume control.",
+        "The generated RC-500 Arm and Start buttons should send momentary 127 -> 0 pulses rather than a single 127 value.",
+        "The generated RC-500 Tmp - and Tmp + buttons should use the exact working Morningstar utility-style message from the April 2 backup, instead of RC-500 CC assigns.",
+        "RC-500 ASSIGN settings are memory-specific, so one memory can work while another ignores the same incoming CC."
       ],
       "requiredRc500Settings": [
         "Set SYNC CLOCK to MIDI or AUTO so the looper follows MC6 clock.",
         "Choose a rhythm pattern that behaves as the metronome click.",
-        "Enable the ASSIGN entries below on the RC-500 if the generated Arm, Start, Tempo Up, and Tempo Down buttons should work."
+        "Set RC-500 ASSIGN source mode to MOMENTARY for the CC-based controls.",
+        "Enable the ASSIGN entries below on the RC-500 if the generated Arm and Start buttons should work."
       ],
       "suggestedAssignMap": [
         {
@@ -385,14 +389,6 @@
         {
           "cc": 22,
           "target": "transport START/STOP target"
-        },
-        {
-          "cc": 23,
-          "target": "TEMPO DOWN"
-        },
-        {
-          "cc": 24,
-          "target": "TEMPO UP"
         },
         {
           "cc": 26,
@@ -1010,10 +1006,10 @@
         }
       },
       "expressionStrategy": {
-        "summary": "The current generated MC6 file uses controller-side expression on Omniport 4, with one bank-specific expression preset per Flint page.",
+        "summary": "The current generated MC6 file uses controller-side expression on Omniport 1, with one bank-specific expression preset per Flint page.",
         "recommendedApproach": [
           "Use the Reverb bank expression preset to send Flint CC18 Mix and CC20 Decay together.",
-          "Use the Tremolo bank expression preset to send Flint CC12 Intensity and a small amount of CC15 Boost.",
+          "Use the Tremolo bank expression preset to send Flint CC12 Intensity only.",
           "Keep pedal-side Flint expression assignments as a later option only if a future revision needs deeper internal preset morphing."
         ],
         "currentGeneratedAssignments": [
@@ -1154,12 +1150,12 @@
       "notes": [
         "EC-1 is much simpler than Flint or Deco because it is one effect, so preset recall is usually enough.",
         "If you keep your main EC-1 sounds in MIDI preset locations 0-127, one Program Change is enough to recall them.",
-        "Delay Light is the current always-on slapback sound and should send CC63 = 0 on Position 1 so MIDI Clock follow is off.",
-        "Delay Light should send CC63 = 127 on Position 2 so clock follow is restored when that toggle is turned off.",
+        "Delay Slapback is the current always-on fixed-time sound and should send CC63 = 0 on Position 1 so MIDI Clock follow is off.",
+        "Delay Slapback should send CC63 = 127 on Position 2 so clock follow is restored when that toggle is turned off.",
         "Delay Medium, Delay Medium Heavy, and Delay Heavy should each send CC63 = 127 on Position 1 so choosing another delay sound restores clock follow.",
         "The current generated Tap buttons should not send direct CC93 tap to the EC-1 anymore.",
-        "Tap should update the MC6 internal MIDI clock and relay sync instead, so Delay Light can stay fixed while the other delay presets continue to follow tempo.",
-        "The current generated Delay bank expression preset on Omniport 4 should send EC-1 CC16 Mix and CC14 Repeats.",
+        "Tap should update the MC6 internal MIDI clock and relay sync instead, so Delay Slapback can stay fixed while the other delay presets continue to follow tempo.",
+        "The current generated Delay bank expression preset on Omniport 1 should send EC-1 CC16 Mix and CC14 Repeats.",
         "The current generated Delay expression ranges are intended to feel most dramatic on the Heavy delay sound, moving from a strong lead repeat into a wetter and more blooming texture."
       ],
       "proposedDelayManualBank": {
@@ -1206,7 +1202,7 @@
         },
         "expressionNote": [
           "Because the current MC6 expression setup is bank-wide, one manual page should only have one expression job at a time.",
-          "If expression is added to a manual workflow later, the clean pattern is separate sub-pages like Delay Mix, Delay Repeats, Delay Age, and Delay Mechanics, each with its own Omniport 4 expression assignment."
+          "If expression is added to a manual workflow later, the clean pattern is separate sub-pages like Delay Mix, Delay Repeats, Delay Age, and Delay Mechanics, each with its own Omniport 1 expression assignment."
         ],
         "importantConstraints": [
           "Dry Mode and Spillover are global EC-1 settings, not normal live MIDI-scrolled parameters.",
@@ -1599,7 +1595,7 @@
         }
       },
       "expressionStrategy": {
-        "summary": "The current generated MC6 file uses controller-side expression on Omniport 4 for both the Doubler and Tape pages.",
+        "summary": "The current generated MC6 file uses controller-side expression on Omniport 1 for both the Doubler and Tape pages.",
         "recommendedApproach": [
           "Use the Doubler bank expression preset to send Doubletracker Lag Time, Blend, and Wobble together.",
           "Use the Tape bank expression preset to send Tape Saturation and Tone together.",
